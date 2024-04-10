@@ -2,8 +2,9 @@ import 'package:flutter/material.dart';
 
 const Color textColor = Colors.black;
 const Color backgroundColor = Colors.white70;
-const Color textFieldColor = Color.fromARGB(45, 0, 0, 0);
+const Color textFieldColor = Color.fromARGB(28, 0, 0, 0);
 const Color borderColor = Color.fromARGB(132, 0, 0, 0);
+const Color errorColor = Color.fromARGB(255, 168, 2, 2);
 
 const TextStyle generalStyle = TextStyle(
   color: textColor,
@@ -12,6 +13,6 @@ const TextStyle generalStyle = TextStyle(
 );
 const TextStyle style = TextStyle(
   color: textColor,
-  fontFamily: "insta",
+  fontFamily: "Inter",
   fontSize: 18,
 );

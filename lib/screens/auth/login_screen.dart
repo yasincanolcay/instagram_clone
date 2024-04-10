@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:instagram_clone/resources/auth_methods.dart';
 import 'package:instagram_clone/screens/auth/sign_in_screen.dart';
 import 'package:instagram_clone/utils/colors.dart';
+import 'package:instagram_clone/utils/utils.dart';
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
@@ -10,6 +12,40 @@ class LoginScreen extends StatefulWidget {
 }
 
 class _LoginScreenState extends State<LoginScreen> {
+  final TextEditingController _emailController = TextEditingController();
+  final TextEditingController _passwordController = TextEditingController();
+  bool isLoading = false;
+  void loginUser() async {
+    if (_emailController.text.isNotEmpty &&
+        _passwordController.text.isNotEmpty) {
+      setState(() {
+        isLoading = true;
+      });
+      bool response = await AuthMethods()
+          .loginUser(_emailController.text, _passwordController.text);
+      if (mounted) {
+        if (response) {
+          Utils().showSnackBar(
+            "Giriş yaptınız",
+            context,
+            backgroundColor,
+          );
+          //burada ana sayfaya git
+          
+        }
+      }
+      setState(() {
+        isLoading = false;
+      });
+    } else {
+      Utils().showSnackBar(
+        "Lütfen gerekli alanları doldurunuz, boş alanlar var!",
+        context,
+        backgroundColor,
+      );
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -40,7 +76,7 @@ class _LoginScreenState extends State<LoginScreen> {
                   padding: const EdgeInsets.symmetric(horizontal: 4.0),
                   decoration: BoxDecoration(
                     color: textFieldColor,
-                    borderRadius: BorderRadius.circular(15),
+                    borderRadius: BorderRadius.circular(8),
                     border: Border.all(
                       color: borderColor,
                       width: 1,
@@ -66,7 +102,7 @@ class _LoginScreenState extends State<LoginScreen> {
                   padding: const EdgeInsets.symmetric(horizontal: 4.0),
                   decoration: BoxDecoration(
                     color: textFieldColor,
-                    borderRadius: BorderRadius.circular(15),
+                    borderRadius: BorderRadius.circular(8),
                     border: Border.all(
                       color: borderColor,
                       width: 1,
@@ -88,13 +124,29 @@ class _LoginScreenState extends State<LoginScreen> {
                 ),
                 Padding(
                   padding: const EdgeInsets.symmetric(horizontal: 25),
-                  child: ElevatedButton(
-                    onPressed: () {
-                      //giriş yapılacak
-                    },
-                    child: const Text(
-                      "Giriş Yap",
-                      style: style,
+                  child: SizedBox(
+                    width: double.infinity,
+                    child: ElevatedButton(
+                      style: ButtonStyle(
+                        backgroundColor:
+                            const MaterialStatePropertyAll(Colors.blue),
+                        shape: MaterialStatePropertyAll(
+                          RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(10),
+                          ),
+                        ),
+                      ),
+                      onPressed: () {
+                        //giriş yapılacak
+                      },
+                      child: !isLoading
+                          ? const Text(
+                              "Giriş Yap",
+                              style: style,
+                            )
+                          : const Center(
+                              child: CircularProgressIndicator(),
+                            ),
                     ),
                   ),
                 ),
@@ -117,7 +169,7 @@ class _LoginScreenState extends State<LoginScreen> {
                       onPressed: () {
                         Navigator.of(context).pushAndRemoveUntil(
                             MaterialPageRoute(
-                              builder: (context) => SignInScreen(),
+                              builder: (context) => const SignInScreen(),
                             ),
                             (route) => false);
                       },
