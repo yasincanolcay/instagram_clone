@@ -29,15 +29,16 @@ class Utils {
           title: Text(
             content,
             style: const TextStyle(
-                color: Colors.white,
-                fontWeight: FontWeight.bold,
-                fontSize: 17,
-                fontFamily: 'Poppins'),
+              color: Colors.black,
+              fontWeight: FontWeight.bold,
+              fontSize: 17,
+              fontFamily: 'Poppins',
+            ),
           ),
           leading: const Icon(
             CupertinoIcons.check_mark_circled,
             size: 40,
-            color: Colors.white,
+            color: Colors.black,
           ),
         ),
       ),

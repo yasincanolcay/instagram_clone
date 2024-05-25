@@ -4,6 +4,7 @@ import 'package:instagram_clone/screens/pageviewer_screens/profilePage/profile_p
 import 'package:instagram_clone/screens/pageviewer_screens/reels_page.dart';
 import 'package:instagram_clone/screens/pageviewer_screens/search_page.dart';
 import 'package:instagram_clone/utils/colors.dart';
+import 'package:instagram_clone/widgets/post_share_sheet.dart';
 
 class MobileLayout extends StatefulWidget {
   const MobileLayout({super.key});
@@ -34,11 +35,10 @@ class _MobileLayoutState extends State<MobileLayout> {
         onPageChanged: onChangedPage,
         children: [
           //buraya sayfalar gelecek
-          Feed(),
-          SearchPage(),
-          ReelsPage(),
-          ProfilePage(),
-          
+          const Feed(),
+          const SearchPage(),
+          const ReelsPage(),
+          const ProfilePage(),
         ],
       ),
       bottomNavigationBar: Container(
@@ -76,8 +76,15 @@ class _MobileLayoutState extends State<MobileLayout> {
             IconButton(
               onPressed: () {
                 // gönderi paylaşımı yapılacak
+                showModalBottomSheet(
+                  context: context,
+                  backgroundColor: Colors.white,
+                  builder: (context) {
+                    return const PostShareSheet();
+                  },
+                );
               },
-              icon: Icon(
+              icon: const Icon(
                 Icons.add_box_outlined,
               ),
             ),

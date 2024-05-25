@@ -83,6 +83,7 @@ class _LoginScreenState extends State<LoginScreen> {
                     ),
                   ),
                   child: TextFormField(
+                    controller: _emailController,
                     keyboardType: TextInputType.emailAddress,
                     decoration: const InputDecoration(
                       border: InputBorder.none,
@@ -109,6 +110,7 @@ class _LoginScreenState extends State<LoginScreen> {
                     ),
                   ),
                   child: TextFormField(
+                    controller: _passwordController,
                     keyboardType: TextInputType.visiblePassword,
                     decoration: const InputDecoration(
                       border: InputBorder.none,
@@ -137,7 +139,7 @@ class _LoginScreenState extends State<LoginScreen> {
                         ),
                       ),
                       onPressed: () {
-                        //giriş yapılacak
+                        loginUser();
                       },
                       child: !isLoading
                           ? const Text(
