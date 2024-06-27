@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:instagram_clone/layouts/mobile_layout.dart';
 import 'package:instagram_clone/resources/auth_methods.dart';
 import 'package:instagram_clone/screens/auth/sign_in_screen.dart';
 import 'package:instagram_clone/utils/colors.dart';
@@ -15,6 +16,7 @@ class _LoginScreenState extends State<LoginScreen> {
   final TextEditingController _emailController = TextEditingController();
   final TextEditingController _passwordController = TextEditingController();
   bool isLoading = false;
+  bool isVisiblePassword = false;
   void loginUser() async {
     if (_emailController.text.isNotEmpty &&
         _passwordController.text.isNotEmpty) {
@@ -31,7 +33,12 @@ class _LoginScreenState extends State<LoginScreen> {
             backgroundColor,
           );
           //burada ana sayfaya git
-          
+          Navigator.of(context).pushAndRemoveUntil(
+            MaterialPageRoute(
+              builder: (context) => const MobileLayout(),
+            ),
+            (route) => false,
+          );
         }
       }
       setState(() {
@@ -111,12 +118,21 @@ class _LoginScreenState extends State<LoginScreen> {
                   ),
                   child: TextFormField(
                     controller: _passwordController,
-                    keyboardType: TextInputType.visiblePassword,
-                    decoration: const InputDecoration(
+                    keyboardType: TextInputType.text,
+                    obscureText: !isVisiblePassword,
+                    decoration:  InputDecoration(
                       border: InputBorder.none,
                       hintText: "Şifreniz",
-                      prefixIcon: Icon(
+                      prefixIcon: const Icon(
                         Icons.lock,
+                      ),
+                      suffixIcon: IconButton(
+                        onPressed: (){
+                          setState(() {
+                            isVisiblePassword = !isVisiblePassword;
+                          });
+                        },
+                        icon:Icon(!isVisiblePassword?Icons.remove_red_eye_rounded:Icons.password,),
                       ),
                     ),
                   ),

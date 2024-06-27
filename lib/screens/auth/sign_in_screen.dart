@@ -43,13 +43,13 @@ class _SignInScreenState extends State<SignInScreen> {
       ],
       uiSettings: [
         AndroidUiSettings(
-            toolbarTitle: 'Cropper',
-            toolbarColor: Colors.deepOrange,
-            toolbarWidgetColor: Colors.white,
+            toolbarTitle: 'Kırp',
+            toolbarColor: Colors.white,
+            toolbarWidgetColor: Colors.black,
             initAspectRatio: CropAspectRatioPreset.original,
             lockAspectRatio: false),
         IOSUiSettings(
-          title: 'Cropper',
+          title: 'Kırp',
         ),
         WebUiSettings(
           context: context,
@@ -58,7 +58,6 @@ class _SignInScreenState extends State<SignInScreen> {
     );
     if (croppedFile != null) {
       image = await croppedFile.readAsBytes();
-
       setState(() {});
     }
   }
@@ -89,7 +88,7 @@ class _SignInScreenState extends State<SignInScreen> {
           Utils().showSnackBar(
             "Hesap oluşturulamadı lütfen tekrar deneyin",
             context,
-            errorColor,
+            redColor,
           );
         }
       }

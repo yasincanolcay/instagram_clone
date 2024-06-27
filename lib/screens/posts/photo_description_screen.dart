@@ -156,8 +156,9 @@ class _PhotoDescriptionScreenState extends State<PhotoDescriptionScreen> {
                       basicStyle:
                           const TextStyle(fontSize: 14, color: Colors.black),
                       decoration: const InputDecoration(
-                          border: InputBorder.none,
-                          hintText: "Açıklama Yazın..."),
+                        border: InputBorder.none,
+                        hintText: "Açıklama Yazın...",
+                      ),
                     ),
                   ),
                   const Divider(

@@ -40,23 +40,23 @@ class MyApp extends StatelessWidget {
         builder: (context, snapshot) {
           if (snapshot.connectionState == ConnectionState.active) {
             if (snapshot.hasData) {
-              return MobileLayout();
+              return const MobileLayout();
             }
           }
           if (snapshot.connectionState == ConnectionState.waiting) {
-            return Center(
+            return const Center(
               child: CircularProgressIndicator(),
             );
           }
           if (snapshot.hasError) {
-            return Center(
+            return const Center(
               child: Icon(
                 Icons.error,
-                color: errorColor,
+                color: redColor,
               ),
             );
           }
-          return LoginScreen();
+          return const LoginScreen();
         },
       ),
     );

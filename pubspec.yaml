@@ -49,10 +49,12 @@ flutter:
     - family: insta
       fonts:
         - asset: assets/fonts/Pacifico-Regular.ttf
-  #       - asset: fonts/Schyler-Italic.ttf
-  #         style: italic
     - family: Inter
       fonts:
         - asset: assets/fonts/Inter-VariableFont_slnt,wght.ttf
-  #       - asset: fonts/TrajanPro_Bold.ttf
-  #         weight: 700
+    - family: poppins1
+      fonts:
+        - asset: assets/fonts/Poppins-Bold.ttf
+    - family: poppins2
+      fonts:
+        - asset: assets/fonts/Poppins-Medium.ttf
