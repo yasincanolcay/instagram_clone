@@ -1,14 +1,12 @@
-import 'package:cached_network_image/cached_network_image.dart';
+// ignore_for_file: prefer_typing_uninitialized_variables
+
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:instagram_clone/resources/firebase_methods.dart';
+import 'package:instagram_clone/screens/comment/comment_card.dart';
 import 'package:instagram_clone/utils/colors.dart';
-import 'package:instagram_clone/utils/global_class.dart';
 import 'package:instagram_clone/utils/utils.dart';
-import 'package:intl/intl.dart';
-
 import '../../models/comment.dart';
 
 class CommentScreen extends StatefulWidget {
@@ -23,8 +21,16 @@ class CommentScreen extends StatefulWidget {
 }
 
 class _CommentScreenState extends State<CommentScreen> {
+  Future? future;
   String uid = FirebaseAuth.instance.currentUser!.uid;
   final TextEditingController _controller = TextEditingController();
+  final FocusNode _node = FocusNode();
+  bool isAnswer = false; //yorum mu/yanıt mı?
+  String answerUid = ""; //yanıt verilen kişinin uid'si
+  String commentId = ""; //yanıt verilen yorum id
+  String username = "";
+  bool answerCard = false; //yanıtın yanıtı veya yorumun yanıtı?
+
   void sendComment() async {
     if (_controller.text.isNotEmpty) {
       bool response = await FirebaseMethods()
@@ -34,8 +40,59 @@ class _CommentScreenState extends State<CommentScreen> {
           Utils().showSnackBar(
               "Yorum yapılamadı, sonra tekrar deneyiniz!", context, redColor);
         }
+      } else {
+        _controller.clear();
+        future = FirebaseFirestore.instance
+            .collection("Posts")
+            .doc(widget.snap["postId"])
+            .collection("comments")
+            .get();
+            setState(() {
+              
+            });
       }
     }
+  }
+
+  void sendAnswer() async {
+    bool response = await FirebaseMethods().sendAnswer(widget.snap["postId"],
+        uid, _controller.text, "text", username, answerUid, commentId);
+    if (!response) {
+      if (mounted) {
+        Utils().showSnackBar(
+            "Yanıt verilemedi, sonra tekrar deneyiniz!", context, redColor);
+      }
+    } else {
+      _controller.clear();
+      isAnswer = false;
+      future = FirebaseFirestore.instance
+          .collection("Posts")
+          .doc(widget.snap["postId"])
+          .collection("comments")
+          .get();
+      setState(() {});
+    }
+  }
+
+  void progressForAnswer(Map data) {
+    isAnswer = true;
+    answerUid = data["answerUid"];
+    commentId = data["commentId"];
+    answerCard = data["answerCard"];
+    username = "@${data["username"]}";
+    _node.requestFocus();
+    setState(() {});
+  }
+
+  @override
+  void initState() {
+    // TODO: implement initState
+    future = FirebaseFirestore.instance
+        .collection("Posts")
+        .doc(widget.snap["postId"])
+        .collection("comments")
+        .get();
+    super.initState();
   }
 
   @override
@@ -47,11 +104,7 @@ class _CommentScreenState extends State<CommentScreen> {
         title: const Text("Yorumlar"),
       ),
       body: FutureBuilder(
-        future: FirebaseFirestore.instance
-            .collection("Posts")
-            .doc(widget.snap["postId"])
-            .collection("comments")
-            .get(),
+        future: future,
         builder: (context, snapshot) {
           if (snapshot.connectionState == ConnectionState.waiting) {
             return const Center(
@@ -78,6 +131,7 @@ class _CommentScreenState extends State<CommentScreen> {
               return CommentCard(
                 snapshot: comment,
                 postSnap: widget.snap,
+                progressForAnswer: progressForAnswer,
               );
             },
           );
@@ -100,180 +154,46 @@ class _CommentScreenState extends State<CommentScreen> {
           ),
           child: TextFormField(
             controller: _controller,
+            focusNode: _node,
             decoration: InputDecoration(
               border: InputBorder.none,
               hintText: "Yorumunuzu girin...",
               suffixIcon: IconButton(
                 //burada yanıt verme işlemleride yapılacak!!
-                onPressed: sendComment,
+                onPressed: !isAnswer ? sendComment : sendAnswer,
                 icon: const Icon(
                   Icons.send_rounded,
                 ),
               ),
+              prefixIcon: isAnswer
+                  ? Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Text(
+                          username,
+                          style: const TextStyle(
+                            fontFamily: "poppins1",
+                            color: Colors.blue,
+                          ),
+                        ),
+                        GestureDetector(
+                          onTap: () {
+                            setState(() {
+                              isAnswer = false;
+                              answerCard = false;
+                            });
+                          },
+                          child: const Icon(
+                            Icons.close_rounded,
+                            color: textColor,
+                          ),
+                        )
+                      ],
+                    )
+                  : null,
             ),
           ),
         ),
-      ),
-    );
-  }
-}
-
-class CommentCard extends StatefulWidget {
-  const CommentCard({
-    super.key,
-    required this.snapshot,
-    required this.postSnap,
-  });
-  final Comment snapshot;
-  final postSnap;
-
-  @override
-  State<CommentCard> createState() => _CommentCardState();
-}
-
-class _CommentCardState extends State<CommentCard> {
-  String username = "";
-  String profilePhoto = "";
-  bool verified = false;
-  List<String> likesList = [];
-  void getUserData() async {
-    var userSnap = await FirebaseFirestore.instance
-        .collection("users")
-        .doc(widget.snapshot.uid)
-        .get();
-    username = userSnap.data()!["username"];
-    profilePhoto = userSnap.data()!["profilePhoto"];
-    verified = userSnap.data()!["verified"];
-    setState(() {});
-    getLikes();
-  }
-
-  void getLikes() async {
-    await FirebaseFirestore.instance
-        .collection("Posts")
-        .doc(widget.postSnap["postId"])
-        .collection("comments")
-        .doc(widget.snapshot.commentId)
-        .collection("likes")
-        .get()
-        .then((value) {
-      for (var element in value.docs) {
-        likesList.add(element.data()["uid"]);
-      }
-    });
-    setState(() {
-    });
-  }
-
-  @override
-  void initState() {
-    getUserData();
-    super.initState();
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      padding: const EdgeInsets.all(8.0),
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.start,
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          profilePhoto.isNotEmpty
-              ? CircleAvatar(
-                  radius: 15,
-                  backgroundImage: CachedNetworkImageProvider(
-                    profilePhoto,
-                    cacheManager: GlobalClass.customCacheManager,
-                  ),
-                )
-              : CircleAvatar(
-                  radius: 15,
-                ),
-          const SizedBox(
-            width: 8.0,
-          ),
-          Expanded(
-            child: Padding(
-              padding: const EdgeInsets.only(left: 8.0),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Row(
-                    children: [
-                      Expanded(
-                        child: RichText(
-                          text: TextSpan(
-                            children: [
-                              TextSpan(
-                                  text: "$username ",
-                                  style: TextStyle(
-                                    fontFamily: "poppins1",
-                                    color: textColor,
-                                  )),
-                              WidgetSpan(
-                                child: verified
-                                    ? Icon(Icons.verified, size: 16.0)
-                                    : SizedBox(),
-                              ),
-                              TextSpan(
-                                text: widget.snapshot.text,
-                                style: TextStyle(
-                                  fontFamily: "Inter",
-                                  color: textColor,
-                                ),
-                              )
-                            ],
-                          ),
-                        ),
-                      ),
-                    ],
-                  ),
-                  Padding(
-                    padding: const EdgeInsets.only(
-                      top: 4,
-                    ),
-                    child: Text(
-                      DateFormat.yMMMd().add_Hm().format(
-                            widget.snapshot.date,
-                          ),
-                      style: const TextStyle(
-                        fontSize: 12,
-                        fontWeight: FontWeight.w400,
-                        color: Colors.grey,
-                      ),
-                    ),
-                  ),
-                  Row(
-                    children: [
-                      TextButton(
-                          onPressed: () {}, child: const Text("Yanıtla")),
-                      TextButton(
-                        onPressed: () {},
-                        child: const Text(
-                          "Tüm Yanıtları Gör(0)",
-                        ),
-                      ),
-                    ],
-                  ),
-                  //Yanıtlar burada build edilecek
-                  //-----
-                ],
-              ),
-            ),
-          ),
-          Column(
-            children: [
-              IconButton(
-                onPressed: () {},
-                icon: Icon(
-                  CupertinoIcons.heart,
-                ),
-              ),
-              Text("${likesList.length} Begeni"),
-            ],
-          ),
-        ],
       ),
     );
   }

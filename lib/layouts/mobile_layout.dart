@@ -33,12 +33,12 @@ class _MobileLayoutState extends State<MobileLayout> {
       body: PageView(
         controller: _pageController,
         onPageChanged: onChangedPage,
-        children: [
+        children: const [
           //buraya sayfalar gelecek
-          const Feed(),
-          const SearchPage(),
-          const ReelsPage(),
-          const ProfilePage(),
+          Feed(),
+          SearchPage(),
+          ReelsPage(),
+          ProfilePage(),
         ],
       ),
       bottomNavigationBar: Container(

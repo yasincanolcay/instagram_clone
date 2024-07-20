@@ -1,6 +1,8 @@
 import 'dart:typed_data';
 
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
+import 'package:instagram_clone/models/answer.dart';
 import 'package:instagram_clone/models/comment.dart';
 import 'package:instagram_clone/models/post.dart';
 import 'package:instagram_clone/resources/storage_methods.dart';
@@ -8,6 +10,7 @@ import 'package:uuid/uuid.dart';
 
 class FirebaseMethods {
   final fire = FirebaseFirestore.instance;
+  final uid = FirebaseAuth.instance.currentUser!.uid;
 
   Future<bool> uploadPost(
     String description,
@@ -28,7 +31,7 @@ class FirebaseMethods {
             await StorageMethods().uploadImageToStorage("posts", element, true);
         contentUrl.add(url);
       }
-      String id = Uuid().v1();
+      String id = const Uuid().v1();
       Post post = Post(
         description: description,
         author: author,
@@ -47,7 +50,6 @@ class FirebaseMethods {
       await fire.collection("Posts").doc(id).set(post.toJson());
       return true;
     } catch (err) {
-      print(err);
       return false;
     }
   }
@@ -80,22 +82,151 @@ class FirebaseMethods {
     }
   }
 
-  Future<bool> sendComment(String postId, String uid, String text,String type) async {
+  Future<bool> sendComment(
+      String postId, String uid, String text, String type) async {
     try {
-      String commentId = Uuid().v1();
+      String commentId = const Uuid().v1();
       Comment comment = Comment(
-        text: text,
-        uid: uid,
-        commentId: commentId,
-        date: DateTime.now(),
-        type: type
-      );
+          text: text,
+          uid: uid,
+          commentId: commentId,
+          date: DateTime.now(),
+          type: type);
       await fire
           .collection("Posts")
           .doc(postId)
           .collection("comments")
           .doc(commentId)
           .set(comment.toJson());
+      return true;
+    } catch (err) {
+      return false;
+    }
+  }
+
+  Future<bool> sendAnswer(String postId, String uid, String text, String type,
+      String username, String answerUid, String commentId) async {
+    try {
+      String answerId = const Uuid().v1();
+      Answer comment = Answer(
+        text: text,
+        uid: uid,
+        answerId: commentId,
+        date: DateTime.now(),
+        type: type,
+        answerUid: answerUid,
+        username: username,
+      );
+      await fire
+          .collection("Posts")
+          .doc(postId)
+          .collection("comments")
+          .doc(commentId)
+          .collection("answers")
+          .doc(answerId)
+          .set(comment.toJson());
+      return true;
+    } catch (err) {
+      return false;
+    }
+  }
+
+  Future<bool> likeComment(
+      String postId, String commentId, String uid, bool isLike) async {
+    try {
+      if (isLike) {
+        await fire
+            .collection("Posts")
+            .doc(postId)
+            .collection("comments")
+            .doc(commentId)
+            .collection("likes")
+            .doc(uid)
+            .set({
+          "uid": uid,
+        });
+      } else {
+        await fire
+            .collection("Posts")
+            .doc(postId)
+            .collection("comments")
+            .doc(commentId)
+            .collection("likes")
+            .doc(uid)
+            .delete();
+      }
+
+      return true;
+    } catch (err) {
+      return false;
+    }
+  }
+
+  Future<bool> likeAnswer(String postId, String commentId, String answerId,
+      String uid, bool isLike) async {
+    try {
+      if (isLike) {
+        await fire
+            .collection("Posts")
+            .doc(postId)
+            .collection("comments")
+            .doc(commentId)
+            .collection("answers")
+            .doc(answerId)
+            .collection("likes")
+            .doc(uid)
+            .set({
+          "uid": uid,
+        });
+      } else {
+        await fire
+            .collection("Posts")
+            .doc(postId)
+            .collection("comments")
+            .doc(commentId)
+            .collection("answers")
+            .doc(answerId)
+            .collection("likes")
+            .doc(uid)
+            .delete();
+      }
+
+      return true;
+    } catch (err) {
+      return false;
+    }
+  }
+
+  Future<bool> savePost(
+    String postId,
+    String collectionName,
+    String thumbnail,
+  ) async {
+    try {
+      await fire
+          .collection("users")
+          .doc(uid)
+          .collection("SavedPosts")
+          .doc(postId)
+          .set({
+        "postId": postId,
+        "thumbnail": thumbnail,
+        "collectionName": collectionName,
+      });
+      return true;
+    } catch (err) {
+      return false;
+    }
+  }
+
+  Future<bool> unSavePost(String postId) async {
+    try {
+      await fire
+          .collection("users")
+          .doc(uid)
+          .collection("SavedPosts")
+          .doc(postId)
+          .delete();
       return true;
     } catch (err) {
       return false;

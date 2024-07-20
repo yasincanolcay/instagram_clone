@@ -1,3 +1,5 @@
+// ignore_for_file: prefer_typing_uninitialized_variables
+
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:expandable_page_view/expandable_page_view.dart';
@@ -10,6 +12,8 @@ import 'package:instagram_clone/screens/comment/comment_screen.dart';
 import 'package:instagram_clone/utils/colors.dart';
 import 'package:instagram_clone/utils/global_class.dart';
 import 'package:instagram_clone/utils/utils.dart';
+import 'package:instagram_clone/widgets/postwidgets/save_post_sheet.dart';
+import 'package:share_plus/share_plus.dart';
 import 'package:smooth_page_indicator/smooth_page_indicator.dart';
 
 class PostCard extends StatefulWidget {
@@ -31,8 +35,10 @@ class _PostCardState extends State<PostCard> with TickerProviderStateMixin {
   String profilePhoto = "";
   bool verified = false;
   bool showMore = false;
+  bool isSaved = false;
   double photoCurrentIndex = 0;
   List<String> likedList = [];
+  int photoSelectedIndex = 0;
 
   void getUserData() async {
     var userSnap = await FirebaseFirestore.instance
@@ -81,6 +87,22 @@ class _PostCardState extends State<PostCard> with TickerProviderStateMixin {
     getUserData();
   }
 
+  void getSavedPost() async {
+    var saveds = await FirebaseFirestore.instance
+        .collection("users")
+        .doc(uid)
+        .collection("SavedPosts")
+        .get()
+        .then((value) {
+      value.docs.forEach((element) {
+        if (element.data()["postId"] == widget.snap["postId"]) {
+          isSaved = true;
+          setState(() {});
+        }
+      });
+    });
+  }
+
   @override
   void initState() {
     _controller = AnimationController(
@@ -105,6 +127,64 @@ class _PostCardState extends State<PostCard> with TickerProviderStateMixin {
     });
     getPostdata();
     super.initState();
+  }
+
+  void savePost(String collectionName, bool isBack) async {
+    bool response = await FirebaseMethods().savePost(widget.snap["postId"],
+        collectionName, widget.snap['contentUrl'][photoSelectedIndex]);
+    if (!response) {
+      if (mounted) {
+        Utils().showSnackBar(
+            "Bir hata oluştu lütfen bağlantınızı kontrol edin!",
+            context,
+            redColor);
+      }
+    } else {
+      setState(() {
+        isSaved = true;
+      });
+      if (!isBack) {
+        //bottom sheet göster
+        if (mounted) {
+          showModalBottomSheet(
+            context: context,
+            backgroundColor: Colors.white,
+            shape: const RoundedRectangleBorder(
+              borderRadius: BorderRadius.vertical(
+                top: Radius.circular(
+                  25,
+                ),
+              ),
+            ),
+            builder: (context) => SavePostSheet(
+              savePost: savePost,
+              thumbnail: widget.snap['contentUrl'][photoSelectedIndex],
+            ),
+          );
+        }
+      } else {
+        if (mounted) {
+          Navigator.pop(context);
+          Utils().showSnackBar("Gönderi $collectionName koleksiyonuna eklendi",
+              context, Colors.white);
+        }
+      }
+    }
+  }
+
+  void unSavePost() async {
+    //gönderi type değişebilir, videolarda thumbnail alıcaz
+    bool response = await FirebaseMethods().unSavePost(widget.snap["postId"]);
+    if (!response) {
+      if (mounted) {
+        Utils().showSnackBar(
+            "Post kaydedilenlerden kaldırılamadı!", context, redColor);
+      }
+    } else {
+      setState(() {
+        isSaved = false;
+      });
+    }
   }
 
   @override
@@ -174,6 +254,7 @@ class _PostCardState extends State<PostCard> with TickerProviderStateMixin {
                   onPageChanged: (value) {
                     setState(() {
                       photoCurrentIndex = value.toDouble();
+                      photoSelectedIndex = value;
                     });
                   },
                   children: List.generate(
@@ -252,7 +333,13 @@ class _PostCardState extends State<PostCard> with TickerProviderStateMixin {
                 ),
               ),
               IconButton(
-                onPressed: () {},
+                onPressed: () async {
+                  await Share.share(
+                    widget.snap['contentUrl'][photoSelectedIndex],
+                    subject:
+                        "İnstagram Klonu uygulamasını indir ve daha fazla keşfet!",
+                  );
+                },
                 icon: Transform.rotate(
                   angle: -0.8,
                   child: const Icon(
@@ -277,9 +364,18 @@ class _PostCardState extends State<PostCard> with TickerProviderStateMixin {
                 flex: 2,
               ),
               IconButton(
-                onPressed: () {},
-                icon: const Icon(
-                  CupertinoIcons.bookmark,
+                onPressed: () {
+                  if (isSaved) {
+                    unSavePost();
+                  } else {
+                    savePost("Kaydedilenler", false);
+                  }
+                },
+                icon: Icon(
+                  !isSaved
+                      ? CupertinoIcons.bookmark
+                      : CupertinoIcons.bookmark_fill,
+                  color: !isSaved ? textColor : null,
                 ),
               ),
             ],
@@ -313,9 +409,7 @@ class _PostCardState extends State<PostCard> with TickerProviderStateMixin {
                         ),
                       ),
                       getHashTagTextSpan(
-                        onTap: (hastag) {
-                          print(hastag);
-                        },
+                        onTap: (hastag) {},
                         source: widget.snap['description'],
                         decoratedStyle:
                             const TextStyle(fontSize: 14, color: Colors.blue),
@@ -348,7 +442,7 @@ class _PostCardState extends State<PostCard> with TickerProviderStateMixin {
     Map location = Map.from(widget.snap["location"]);
     String music = widget.snap["music"];
     if (location.isEmpty && music.isEmpty) {
-      return SizedBox();
+      return const SizedBox();
     } else if (location.isNotEmpty && music.isNotEmpty) {
       //animasyonlu yazı döndüreceğiz
       return Text(

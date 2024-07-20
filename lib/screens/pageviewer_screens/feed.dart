@@ -10,28 +10,29 @@ class Feed extends StatefulWidget {
 }
 
 class _FeedState extends State<Feed> {
+  final Future future = FirebaseFirestore.instance
+      .collection("Posts")
+      .where("verified", isEqualTo: true)
+      .get();
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: Colors.white70,
       body: FutureBuilder(
-          future: FirebaseFirestore.instance
-              .collection("Posts")
-              .where("verified", isEqualTo: true)
-              .get(),
+          future: future,
           builder: (context, snapshot) {
             if (snapshot.connectionState == ConnectionState.waiting) {
-              return Center(
+              return const Center(
                 child: CircularProgressIndicator(),
               );
             }
             if (!snapshot.hasData) {
-              return Center(
+              return const Center(
                 child: CircularProgressIndicator(),
               );
             }
             if (snapshot.hasError) {
-              return Center(
+              return const Center(
                 child: Icon(
                   Icons.error,
                   color: Colors.red,

@@ -1,3 +1,5 @@
+// ignore_for_file: unused_local_variable
+
 import 'package:flutter/material.dart';
 import 'package:insta_assets_picker/insta_assets_picker.dart';
 import 'package:instagram_clone/screens/posts/photo_description_screen.dart';
@@ -15,7 +17,7 @@ class PostShareSheet extends StatelessWidget {
           child: Container(
             width: 50,
             height: 10,
-            margin: EdgeInsets.all(10.0),
+            margin: const EdgeInsets.all(10.0),
             decoration: BoxDecoration(
               color: textColor,
               borderRadius: BorderRadius.circular(30),
@@ -69,11 +71,11 @@ class PostShareSheet extends StatelessWidget {
             Icons.photo,
             color: textColor,
           ),
-          trailing: Icon(
+          trailing: const Icon(
             Icons.arrow_forward_ios_rounded,
           ),
         ),
-        Divider(),
+        const Divider(),
         ListTile(
           onTap: () {},
           title: const Text("Reels Paylaş"),
@@ -81,11 +83,11 @@ class PostShareSheet extends StatelessWidget {
             Icons.movie_filter,
             color: textColor,
           ),
-          trailing: Icon(
+          trailing: const Icon(
             Icons.arrow_forward_ios_rounded,
           ),
         ),
-        Divider(),
+        const Divider(),
         ListTile(
           onTap: () {},
           title: const Text("Hikaye Paylaş"),
@@ -93,11 +95,11 @@ class PostShareSheet extends StatelessWidget {
             Icons.auto_awesome_rounded,
             color: textColor,
           ),
-          trailing: Icon(
+          trailing: const Icon(
             Icons.arrow_forward_ios_rounded,
           ),
         ),
-        SizedBox(
+        const SizedBox(
           height: 10.0,
         ),
       ],

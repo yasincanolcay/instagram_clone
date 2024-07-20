@@ -1,7 +1,5 @@
-import 'dart:convert';
 import 'dart:io';
 import 'dart:typed_data';
-
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:hashtagable_v3/widgets/hashtag_text_field.dart';
@@ -148,7 +146,6 @@ class _PhotoDescriptionScreenState extends State<PhotoDescriptionScreen> {
                       },
                       onDetectionFinished: () {
                         hastags.add(currentHastag);
-                        print(hastags);
                       },
                       controller: _controller,
                       decoratedStyle:
