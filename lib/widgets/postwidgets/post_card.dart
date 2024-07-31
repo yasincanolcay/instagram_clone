@@ -9,6 +9,7 @@ import 'package:flutter/material.dart';
 import 'package:hashtagable_v3/hashtagable.dart';
 import 'package:instagram_clone/resources/firebase_methods.dart';
 import 'package:instagram_clone/screens/comment/comment_screen.dart';
+import 'package:instagram_clone/screens/push/searcher_page.dart';
 import 'package:instagram_clone/utils/colors.dart';
 import 'package:instagram_clone/utils/global_class.dart';
 import 'package:instagram_clone/utils/utils.dart';
@@ -49,6 +50,7 @@ class _PostCardState extends State<PostCard> with TickerProviderStateMixin {
     profilePhoto = userSnap.data()!["profilePhoto"];
     verified = userSnap.data()!["verified"];
     setState(() {});
+    getSavedPost();
   }
 
   void likeOrUnLike(bool isLike) async {
@@ -409,7 +411,13 @@ class _PostCardState extends State<PostCard> with TickerProviderStateMixin {
                         ),
                       ),
                       getHashTagTextSpan(
-                        onTap: (hastag) {},
+                        onTap: (hastag) {
+                          Navigator.of(context).push(MaterialPageRoute(
+                              builder: (context) => SearcherPage(
+                                    hashtag: hastag,
+                                    isPost: true,
+                                  )));
+                        },
                         source: widget.snap['description'],
                         decoratedStyle:
                             const TextStyle(fontSize: 14, color: Colors.blue),
