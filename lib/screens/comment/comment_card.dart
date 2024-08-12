@@ -8,6 +8,7 @@ import 'package:flutter/material.dart';
 import 'package:instagram_clone/models/answer.dart';
 import 'package:instagram_clone/resources/firebase_methods.dart';
 import 'package:instagram_clone/screens/comment/answer_card.dart';
+import 'package:instagram_clone/screens/comment/more_comment_process.dart';
 import 'package:instagram_clone/utils/colors.dart';
 import 'package:instagram_clone/utils/global_class.dart';
 import 'package:instagram_clone/utils/utils.dart';
@@ -115,165 +116,187 @@ class _CommentCardState extends State<CommentCard> {
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      padding: const EdgeInsets.all(8.0),
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.start,
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          profilePhoto.isNotEmpty
-              ? CircleAvatar(
-                  radius: 15,
-                  backgroundImage: CachedNetworkImageProvider(
-                    profilePhoto,
-                    cacheManager: GlobalClass.customCacheManager,
-                  ),
-                )
-              : const CircleAvatar(
-                  radius: 15,
-                ),
-          const SizedBox(
-            width: 8.0,
-          ),
-          Expanded(
-            child: Padding(
-              padding: const EdgeInsets.only(left: 8.0),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Row(
-                    children: [
-                      Expanded(
-                        child: RichText(
-                          text: TextSpan(
-                            children: [
-                              TextSpan(
-                                  text: "$username ",
-                                  style: const TextStyle(
-                                    fontFamily: "poppins1",
-                                    color: textColor,
-                                  )),
-                              WidgetSpan(
-                                child: verified
-                                    ? const Icon(Icons.verified, size: 16.0)
-                                    : const SizedBox(),
-                              ),
-                              TextSpan(
-                                text: widget.snapshot.text,
-                                style: const TextStyle(
-                                  fontFamily: "Inter",
-                                  color: textColor,
-                                ),
-                              )
-                            ],
-                          ),
-                        ),
-                      ),
-                    ],
-                  ),
-                  Padding(
-                    padding: const EdgeInsets.only(
-                      top: 4,
-                    ),
-                    child: Text(
-                      DateFormat.yMMMd().add_Hm().format(
-                            widget.snapshot.date,
-                          ),
-                      style: const TextStyle(
-                        fontSize: 12,
-                        fontWeight: FontWeight.w400,
-                        color: Colors.grey,
-                      ),
-                    ),
-                  ),
-                  Row(
-                    children: [
-                      TextButton(
-                        onPressed: () {
-                          widget.progressForAnswer({
-                            "answerUid": widget.snapshot.uid,
-                            "commentId": widget.snapshot.commentId,
-                            "username": username,
-                            "answerCard": false,
-                          });
-                        },
-                        child: const Text("Yanıtla"),
-                      ),
-                      TextButton(
-                        onPressed: () {
-                          setState(() {
-                            showMore = !showMore;
-                          });
-                        },
-                        child: Text(
-                          !showMore
-                              ? "Tüm Yanıtları Gör($answersLength)"
-                              : "Yanıtları Gizle",
-                        ),
-                      ),
-                    ],
-                  ),
-                  //Yanıtlar burada build edilecek
-                  //-----
-                  showMore
-                      ? FutureBuilder(
-                          future: future,
-                          builder: (context, snapshot) {
-                            if (snapshot.connectionState ==
-                                ConnectionState.waiting) {
-                              return const Center(
-                                child: CircularProgressIndicator(),
-                              );
-                            }
-                            if (!snapshot.hasData) {
-                              return const Center(
-                                child: CircularProgressIndicator(),
-                              );
-                            }
-                            if (snapshot.hasError) {
-                              return const Center(
-                                child: Icon(
-                                  Icons.error,
-                                ),
-                              );
-                            }
-                            return ListView.builder(
-                              physics: const NeverScrollableScrollPhysics(),
-                              shrinkWrap: true,
-                              itemCount: snapshot.data!.docs.length,
-                              itemBuilder: (context, index) {
-                                Answer answer =
-                                    Answer.fromSnap(snapshot.data!.docs[index]);
-                                return AnswerCard(
-                                  snapshot: answer,
-                                  postSnap: widget.postSnap,
-                                  progressForAnswer: widget.progressForAnswer,
-                                  commentSnap: widget.snapshot,
-                                );
-                              },
-                            );
-                          },
-                        )
-                      : const SizedBox(),
-                ],
+    return GestureDetector(
+      onLongPress: () {
+        showModalBottomSheet(
+          backgroundColor: backgroundColor,
+          shape: const RoundedRectangleBorder(
+            borderRadius: BorderRadius.vertical(
+              top: Radius.circular(
+                25,
               ),
             ),
           ),
-          Column(
-            children: [
-              IconButton(
-                onPressed: likeComment,
-                icon: Icon(
-                  !likesList.contains(uid)
-                      ? CupertinoIcons.heart
-                      : CupertinoIcons.heart_fill,
-                  color: !likesList.contains(uid) ? null : redColor,
+          context: context,
+          builder: (context) => MoreCommentProcess(
+            uid: uid,
+            postId: widget.postSnap["postId"],
+            commentId: widget.snapshot.commentId,
+            isItMineOfUid: uid == widget.snapshot.uid,
+            commentAuthor:  widget.snapshot.uid,
+          ),
+        );
+      },
+      child: Container(
+        padding: const EdgeInsets.all(8.0),
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.start,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            profilePhoto.isNotEmpty
+                ? CircleAvatar(
+                    radius: 15,
+                    backgroundImage: CachedNetworkImageProvider(
+                      profilePhoto,
+                      cacheManager: GlobalClass.customCacheManager,
+                    ),
+                  )
+                : const CircleAvatar(
+                    radius: 15,
+                  ),
+            const SizedBox(
+              width: 8.0,
+            ),
+            Expanded(
+              child: Padding(
+                padding: const EdgeInsets.only(left: 8.0),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Row(
+                      children: [
+                        Expanded(
+                          child: RichText(
+                            text: TextSpan(
+                              children: [
+                                TextSpan(
+                                    text: "$username ",
+                                    style: const TextStyle(
+                                      fontFamily: "poppins1",
+                                      color: textColor,
+                                    )),
+                                WidgetSpan(
+                                  child: verified
+                                      ? const Icon(Icons.verified, size: 16.0)
+                                      : const SizedBox(),
+                                ),
+                                TextSpan(
+                                  text: widget.snapshot.text,
+                                  style: const TextStyle(
+                                    fontFamily: "Inter",
+                                    color: textColor,
+                                  ),
+                                )
+                              ],
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                    Padding(
+                      padding: const EdgeInsets.only(
+                        top: 4,
+                      ),
+                      child: Text(
+                        DateFormat.yMMMd().add_Hm().format(
+                              widget.snapshot.date,
+                            ),
+                        style: const TextStyle(
+                          fontSize: 12,
+                          fontWeight: FontWeight.w400,
+                          color: Colors.grey,
+                        ),
+                      ),
+                    ),
+                    Row(
+                      children: [
+                        TextButton(
+                          onPressed: () {
+                            widget.progressForAnswer({
+                              "answerUid": widget.snapshot.uid,
+                              "commentId": widget.snapshot.commentId,
+                              "username": username,
+                              "answerCard": false,
+                            });
+                          },
+                          child: const Text("Yanıtla"),
+                        ),
+                        TextButton(
+                          onPressed: () {
+                            setState(() {
+                              showMore = !showMore;
+                            });
+                          },
+                          child: Text(
+                            !showMore
+                                ? "Tüm Yanıtları Gör($answersLength)"
+                                : "Yanıtları Gizle",
+                          ),
+                        ),
+                      ],
+                    ),
+                    //Yanıtlar burada build edilecek
+                    //-----
+                    showMore
+                        ? FutureBuilder(
+                            future: future,
+                            builder: (context, snapshot) {
+                              if (snapshot.connectionState ==
+                                  ConnectionState.waiting) {
+                                return const Center(
+                                  child: CircularProgressIndicator(),
+                                );
+                              }
+                              if (!snapshot.hasData) {
+                                return const Center(
+                                  child: CircularProgressIndicator(),
+                                );
+                              }
+                              if (snapshot.hasError) {
+                                return const Center(
+                                  child: Icon(
+                                    Icons.error,
+                                  ),
+                                );
+                              }
+                              return ListView.builder(
+                                physics: const NeverScrollableScrollPhysics(),
+                                shrinkWrap: true,
+                                itemCount: snapshot.data!.docs.length,
+                                itemBuilder: (context, index) {
+                                  Answer answer = Answer.fromSnap(
+                                      snapshot.data!.docs[index]);
+                                  return AnswerCard(
+                                    snapshot: answer,
+                                    postSnap: widget.postSnap,
+                                    progressForAnswer: widget.progressForAnswer,
+                                    commentSnap: widget.snapshot,
+                                  );
+                                },
+                              );
+                            },
+                          )
+                        : const SizedBox(),
+                  ],
                 ),
               ),
-              Text("${likesList.length} Begeni"),
-            ],
-          ),
-        ],
+            ),
+            Column(
+              children: [
+                IconButton(
+                  onPressed: likeComment,
+                  icon: Icon(
+                    !likesList.contains(uid)
+                        ? CupertinoIcons.heart
+                        : CupertinoIcons.heart_fill,
+                    color: !likesList.contains(uid) ? null : redColor,
+                  ),
+                ),
+                Text("${likesList.length} Begeni"),
+              ],
+            ),
+          ],
+        ),
       ),
     );
   }

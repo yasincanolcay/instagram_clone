@@ -111,7 +111,7 @@ class FirebaseMethods {
       Answer comment = Answer(
         text: text,
         uid: uid,
-        answerId: commentId,
+        answerId: answerId,
         date: DateTime.now(),
         type: type,
         answerUid: answerUid,
@@ -227,6 +227,85 @@ class FirebaseMethods {
           .collection("SavedPosts")
           .doc(postId)
           .delete();
+      return true;
+    } catch (err) {
+      return false;
+    }
+  }
+
+  Future<bool> deleteComment(String postId, String commentId) async {
+    try {
+      await fire
+          .collection("Posts")
+          .doc(postId)
+          .collection("comments")
+          .doc(commentId)
+          .delete();
+      return true;
+    } catch (err) {
+      return false;
+    }
+  }
+
+  Future<bool> deleteAnswer(
+      String postId, String commentId, String answerId) async {
+    try {
+      await fire
+          .collection("Posts")
+          .doc(postId)
+          .collection("comments")
+          .doc(commentId)
+          .collection("answers")
+          .doc(answerId)
+          .delete();
+      return true;
+    } catch (err) {
+      return false;
+    }
+  }
+
+  Future<bool> sendAnswerComplaints(
+    String sender,
+    String user,
+    String type,
+    String answerId,
+    String postId,
+    String commentId,
+  ) async {
+    try {
+      String id = Uuid().v1();
+      await fire.collection("AnswerComplaints").doc(id).set({
+        "sender": sender,
+        "user": user,
+        "type": type,
+        "date": DateTime.now(),
+        "answerId": answerId,
+        "postId": postId,
+        "commentId": commentId,
+      });
+      return true;
+    } catch (err) {
+      return false;
+    }
+  }
+
+  Future<bool> sendCommentComplaints(
+    String sender,
+    String user,
+    String type,
+    String commentId,
+    String postId,
+  ) async {
+    try {
+      String id = Uuid().v1();
+      await fire.collection("CommentComplaints").doc(id).set({
+        "sender": sender,
+        "user": user,
+        "type": type,
+        "date": DateTime.now(),
+        "postId": postId,
+        "commentId": commentId,
+      });
       return true;
     } catch (err) {
       return false;

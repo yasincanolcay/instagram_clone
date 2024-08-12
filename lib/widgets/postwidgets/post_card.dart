@@ -50,7 +50,9 @@ class _PostCardState extends State<PostCard> with TickerProviderStateMixin {
     profilePhoto = userSnap.data()!["profilePhoto"];
     verified = userSnap.data()!["verified"];
     setState(() {});
-    getSavedPost();
+    getSavedPost(); //kaydedilenler alındı
+    //username yazılacak
+    //extra: yorum ve yanıt sil işlemi
   }
 
   void likeOrUnLike(bool isLike) async {
@@ -403,8 +405,8 @@ class _PostCardState extends State<PostCard> with TickerProviderStateMixin {
                         : TextOverflow.visible,
                     maxLines: !showMore ? 3 : null,
                     text: TextSpan(children: [
-                      const TextSpan(
-                        text: "Username ",
+                      TextSpan(
+                        text: "$username ",
                         style: TextStyle(
                           color: textColor,
                           fontWeight: FontWeight.bold,

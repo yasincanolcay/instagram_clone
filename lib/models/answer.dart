@@ -22,7 +22,7 @@ class Answer {
   Map<String, dynamic> toJson() => {
         "text": text,
         "uid": uid,
-        "commentId": answerId,
+        "answerId": answerId,
         "date": date,
         "type": type,
         "username": username,
