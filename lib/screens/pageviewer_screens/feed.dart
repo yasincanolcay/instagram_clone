@@ -1,5 +1,6 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
+import 'package:instagram_clone/resources/audio_players_methods.dart';
 import 'package:instagram_clone/widgets/postwidgets/post_card.dart';
 
 class Feed extends StatefulWidget {
@@ -10,9 +11,11 @@ class Feed extends StatefulWidget {
 }
 
 class _FeedState extends State<Feed> {
+  final AudioPlayersMethods playerMethods = AudioPlayersMethods();
   final Future future = FirebaseFirestore.instance
       .collection("Posts")
       .where("verified", isEqualTo: true)
+      .orderBy("publishDate",descending: true)
       .get();
   @override
   Widget build(BuildContext context) {
@@ -43,7 +46,7 @@ class _FeedState extends State<Feed> {
               child: ListView.builder(
                 itemCount: snapshot.data!.docs.length,
                 itemBuilder: (context, index) {
-                  return PostCard(snap: snapshot.data!.docs[index].data());
+                  return PostCard(snap: snapshot.data!.docs[index].data(),playerMethods: playerMethods,);
                 },
               ),
             );

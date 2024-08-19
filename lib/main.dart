@@ -18,6 +18,7 @@ void main() async {
     Permission.manageExternalStorage,
     Permission.photos,
     Permission.storage,
+    Permission.location,
   ].request();
   runApp(const MyApp());
 }

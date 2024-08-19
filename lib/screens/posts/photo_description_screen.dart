@@ -1,11 +1,16 @@
 import 'dart:io';
 import 'dart:typed_data';
+import 'package:audioplayers/audioplayers.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:hashtagable_v3/widgets/hashtag_text_field.dart';
 import 'package:insta_assets_picker/insta_assets_picker.dart';
+import 'package:instagram_clone/resources/audio_players_methods.dart';
 import 'package:instagram_clone/resources/firebase_methods.dart';
+import 'package:instagram_clone/screens/posts/location_picker.dart';
+import 'package:instagram_clone/screens/posts/music_picker.dart';
 import 'package:instagram_clone/screens/posts/sub_photo_screen.dart';
+import 'package:instagram_clone/screens/posts/users_picker.dart';
 import 'package:instagram_clone/utils/colors.dart';
 import 'package:instagram_clone/utils/utils.dart';
 
@@ -21,13 +26,19 @@ class PhotoDescriptionScreen extends StatefulWidget {
 }
 
 class _PhotoDescriptionScreenState extends State<PhotoDescriptionScreen> {
+  final AudioPlayersMethods playersMethods = AudioPlayersMethods();
   final TextEditingController _controller = TextEditingController();
   String uid = FirebaseAuth.instance.currentUser!.uid;
   bool isComment = false;
   bool isDownload = false;
   bool isUploading = false;
   String currentHastag = "";
+  String music = "";
+  String musicName = "";
+  Map musicData = {};
   List<String> hastags = [];
+  List<Map> users = [];
+  Map locationMap = {};
   void uploadPost(List<File> croppedFiles) async {
     setState(() {
       isUploading = true;
@@ -39,17 +50,17 @@ class _PhotoDescriptionScreenState extends State<PhotoDescriptionScreen> {
     }
 
     bool response = await FirebaseMethods().uploadPost(
-      _controller.text,
-      uid,
-      hastags,
-      isComment,
-      isDownload,
-      "",
-      "photo",
-      {},
-      [],
-      bytes,
-    );
+        _controller.text,
+        uid,
+        hastags,
+        isComment,
+        isDownload,
+        music,
+        "photo",
+        locationMap,
+        [],
+        bytes,
+        musicName);
     if (response) {
       if (mounted) {
         Navigator.pop(context);
@@ -64,6 +75,45 @@ class _PhotoDescriptionScreenState extends State<PhotoDescriptionScreen> {
             "Gönderi paylaşılamadı, daha sonra deneyin!", context, Colors.red);
       }
     }
+  }
+
+  void addUsers(List<Map> usersList) {
+    setState(() {
+      users = usersList;
+    });
+  }
+
+  void setLocation(Map data) {
+    setState(() {
+      locationMap = data;
+    });
+  }
+
+  void setMusic(String musicId, Map data) {
+    setState(() {
+      music = musicId;
+      musicData = data;
+      musicName = "${data["author"]} - ${data["name"]}";
+    });
+    Navigator.pop(context);
+  }
+
+  String checkUser() {
+    switch (users.length) {
+      case == 2:
+        return "${users[0]["username"]},${users[1]["username"]}";
+      case > 2:
+        return "${users[0]["username"]}, ${users[1]["username"]} ve +${users.length - 2}";
+      default:
+        return "${users[0]["username"]}";
+    }
+  }
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    playersMethods.stop();
+    super.dispose();
   }
 
   @override
@@ -161,30 +211,110 @@ class _PhotoDescriptionScreenState extends State<PhotoDescriptionScreen> {
                   const Divider(
                     thickness: 0.0,
                   ),
-                  const ListTile(
-                    leading: Icon(
+                  ListTile(
+                    onTap: () {
+                      Navigator.of(context).push(
+                        MaterialPageRoute(
+                          builder: (context) => LocationPicker(
+                            locationData: setLocation,
+                            data: locationMap,
+                          ),
+                        ),
+                      );
+                    },
+                    leading: const Icon(
                       Icons.location_on,
                     ),
-                    title: Text("Konum Ekle"),
-                    trailing: Icon(
-                      Icons.arrow_forward_ios_rounded,
+                    title: Text(
+                      locationMap.isEmpty
+                          ? "Konum Ekle"
+                          : "${locationMap["address"]}",
+                      overflow: TextOverflow.ellipsis,
+                      maxLines: 1,
+                    ),
+                    trailing: IconButton(
+                      onPressed: () {
+                        if (locationMap.isNotEmpty) {
+                          setState(() {
+                            locationMap.clear();
+                          });
+                        }
+                      },
+                      icon: Icon(
+                        locationMap.isEmpty
+                            ? Icons.arrow_forward_ios_rounded
+                            : Icons.cancel_rounded,
+                      ),
                     ),
                   ),
-                  const ListTile(
-                    leading: Icon(
+                  ListTile(
+                    onTap: () {
+                      showModalBottomSheet(
+                          context: context,
+                          isScrollControlled: true,
+                          shape: const RoundedRectangleBorder(
+                            borderRadius: BorderRadius.vertical(
+                              top: Radius.circular(
+                                25,
+                              ),
+                            ),
+                          ),
+                          builder: (context) {
+                            return FractionallySizedBox(
+                              heightFactor: 0.9,
+                              child: MusicPicker(
+                                playerMethods: playersMethods,
+                                setMusic: setMusic,
+                              ),
+                            );
+                          }).then((value) {
+                        Future.delayed(Duration(seconds: 1), () {
+                          playersMethods.playMusic(UrlSource(musicData["url"]));
+                        });
+                      });
+                    },
+                    leading: const Icon(
                       Icons.music_note_rounded,
                     ),
-                    title: Text("Müzik Ekle"),
-                    trailing: Icon(
-                      Icons.arrow_forward_ios_rounded,
+                    title: Text(
+                      musicData.isEmpty
+                          ? "Müzik Ekle"
+                          : "${musicData["name"]} - ${musicData["author"]}",
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
                     ),
+                    trailing: musicData.isEmpty
+                        ? const Icon(
+                            Icons.arrow_forward_ios_rounded,
+                          )
+                        : IconButton(
+                            onPressed: () {
+                              setState(() {
+                                playersMethods.stop();
+                                musicData.clear();
+                                music = "";
+                              });
+                            },
+                            icon: Icon(Icons.cancel_rounded),
+                          ),
                   ),
-                  const ListTile(
-                    leading: Icon(
+                  ListTile(
+                    onTap: () {
+                      Navigator.of(context).push(
+                        MaterialPageRoute(
+                          builder: (context) => UsersPicker(
+                            addUsers: addUsers,
+                            users: users,
+                          ),
+                        ),
+                      );
+                    },
+                    leading: const Icon(
                       Icons.people_alt_rounded,
                     ),
-                    title: Text("Kişileri Etiketle"),
-                    trailing: Icon(
+                    title:
+                        Text(users.isEmpty ? "Kişileri Etiketle" : checkUser()),
+                    trailing: const Icon(
                       Icons.arrow_forward_ios_rounded,
                     ),
                   ),

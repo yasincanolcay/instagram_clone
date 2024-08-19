@@ -23,6 +23,7 @@ class FirebaseMethods {
     Map location,
     List<Map> users,
     List<Uint8List> bytes,
+    String musicName,
   ) async {
     try {
       List<String> contentUrl = [];
@@ -46,6 +47,7 @@ class FirebaseMethods {
         verified: true,
         location: location,
         users: users,
+        musicName: musicName
       );
       await fire.collection("Posts").doc(id).set(post.toJson());
       return true;

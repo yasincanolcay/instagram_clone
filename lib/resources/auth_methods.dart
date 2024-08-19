@@ -38,6 +38,7 @@ class AuthMethods {
         profilePhoto: photoUrl,
         createDate: DateTime.now(),
         verified: false,
+        uid: _cred.user!.uid,
       );
       await _fire.collection("users").doc(_cred.user!.uid).set(user.toJson());
       return true;

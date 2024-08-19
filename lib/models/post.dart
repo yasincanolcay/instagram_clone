@@ -16,6 +16,7 @@ class Post {
   final bool verified;
   final Map location;
   final List<Map> users;
+  final String musicName;
   const Post({
     required this.description,
     required this.author,
@@ -30,6 +31,7 @@ class Post {
     required this.verified,
     required this.location,
     required this.users,
+    required this.musicName,
   });
 
   Map<String, dynamic> toJson() => {
@@ -46,6 +48,7 @@ class Post {
         'verified': verified,
         "location": location,
         "users": users,
+        "musicName":musicName,
       };
 
   static Post fromSnap(DocumentSnapshot snap) {
@@ -64,6 +67,7 @@ class Post {
       verified: snapshot['verified'],
       location: snapshot["location"],
       users: snapshot["users"],
+      musicName: snapshot["musicName"],
     );
   }
 }

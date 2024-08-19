@@ -5,6 +5,7 @@ class User {
   final String bio;
   final String email;
   final String profilePhoto;
+  final String uid;
   final DateTime createDate;
   final bool verified;
 
@@ -15,6 +16,7 @@ class User {
     required this.profilePhoto,
     required this.createDate,
     required this.verified,
+    required this.uid,
   });
 
   Map<String, dynamic> toJson() => {
@@ -24,6 +26,7 @@ class User {
         "profilePhoto": profilePhoto,
         "createDate": createDate,
         "verified": verified,
+        "uid":uid,
       };
 
   static User fromSnap(DocumentSnapshot snap) {
@@ -33,8 +36,9 @@ class User {
       bio: snapshot["bio"],
       email: snapshot["email"],
       profilePhoto: snapshot["profilePhoto"],
-      createDate: snapshot["createDate"],
+      createDate: snapshot["createDate"].toDate(),
       verified: snapshot["verified"],
+      uid: snapshot["uid"],
     );
   }
 }
