@@ -1,3 +1,5 @@
+// ignore_for_file: use_build_context_synchronously
+
 import 'package:flutter/material.dart';
 import 'package:instagram_clone/resources/firebase_methods.dart';
 import 'package:instagram_clone/screens/comment/delete_dialog.dart';

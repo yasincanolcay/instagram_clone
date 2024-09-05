@@ -1,34 +1,34 @@
 import 'package:flutter/material.dart';
 
-class DeleteDialog extends StatelessWidget {
-  const DeleteDialog({
+class DeleteWarning extends StatelessWidget {
+  const DeleteWarning({
     super.key,
     required this.title,
-    required this.content,
+    required this.description,
     required this.okPress,
-    required this.okButtonName,
+    required this.okButtonTitle,
   });
   final String title;
-  final String content;
+  final String description;
+  final String okButtonTitle;
   final VoidCallback okPress;
-  final String okButtonName;
 
   @override
   Widget build(BuildContext context) {
     return AlertDialog(
       title: Text(title),
-      content: Text(content),
+      content: Text(description),
       actions: [
         TextButton(
           onPressed: () => Navigator.pop(context),
-          child: const Text(
+          child: Text(
             "İptal",
           ),
         ),
         TextButton(
           onPressed: okPress,
           child: Text(
-            okButtonName,
+            okButtonTitle,
           ),
         ),
       ],

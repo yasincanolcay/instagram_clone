@@ -2,6 +2,7 @@ import 'dart:typed_data';
 
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:firebase_storage/firebase_storage.dart';
 import 'package:instagram_clone/models/answer.dart';
 import 'package:instagram_clone/models/comment.dart';
 import 'package:instagram_clone/models/post.dart';
@@ -24,6 +25,7 @@ class FirebaseMethods {
     List<Map> users,
     List<Uint8List> bytes,
     String musicName,
+    Map musicData,
   ) async {
     try {
       List<String> contentUrl = [];
@@ -34,21 +36,21 @@ class FirebaseMethods {
       }
       String id = const Uuid().v1();
       Post post = Post(
-        description: description,
-        author: author,
-        contentUrl: contentUrl,
-        hastags: hastags,
-        isComment: isComment,
-        isDownload: isDownload,
-        music: music,
-        postId: id,
-        publishDate: DateTime.now(),
-        type: type,
-        verified: true,
-        location: location,
-        users: users,
-        musicName: musicName
-      );
+          musicData: musicData,
+          description: description,
+          author: author,
+          contentUrl: contentUrl,
+          hastags: hastags,
+          isComment: isComment,
+          isDownload: isDownload,
+          music: music,
+          postId: id,
+          publishDate: DateTime.now(),
+          type: type,
+          verified: true,
+          location: location,
+          users: users,
+          musicName: musicName);
       await fire.collection("Posts").doc(id).set(post.toJson());
       return true;
     } catch (err) {
@@ -275,7 +277,7 @@ class FirebaseMethods {
     String commentId,
   ) async {
     try {
-      String id = Uuid().v1();
+      String id = const Uuid().v1();
       await fire.collection("AnswerComplaints").doc(id).set({
         "sender": sender,
         "user": user,
@@ -299,7 +301,7 @@ class FirebaseMethods {
     String postId,
   ) async {
     try {
-      String id = Uuid().v1();
+      String id = const Uuid().v1();
       await fire.collection("CommentComplaints").doc(id).set({
         "sender": sender,
         "user": user,
@@ -307,6 +309,93 @@ class FirebaseMethods {
         "date": DateTime.now(),
         "postId": postId,
         "commentId": commentId,
+      });
+      return true;
+    } catch (err) {
+      return false;
+    }
+  }
+
+  Future<bool> editPost(Map<String, dynamic> data, String postId) async {
+    try {
+      await fire.collection("Posts").doc(postId).update(data);
+      return true;
+    } catch (err) {
+      return false;
+    }
+  }
+
+  Future<bool> deletePost(Map snap) async {
+    try {
+      if (snap["type"] == "photo") {
+        for (int i = 0; i < snap["contentUrl"].length; i++) {
+          Reference photoRef =
+              FirebaseStorage.instance.refFromURL(snap["contentUrl"][i]);
+          await photoRef.delete();
+        }
+      } else {
+        //reels silecegiz
+      }
+      await fire.collection("Posts").doc(snap["postId"]).delete();
+      return true;
+    } catch (err) {
+      return false;
+    }
+  }
+
+  Future<bool> followOrUnFollow(
+      String uid, String userUid, bool isFollow) async {
+    try {
+      if (isFollow) {
+        await fire
+            .collection("users")
+            .doc(uid)
+            .collection("followings")
+            .doc(userUid)
+            .set({
+          "uid": userUid,
+        });
+        await fire
+            .collection("users")
+            .doc(userUid)
+            .collection("followers")
+            .doc(uid)
+            .set({
+          "uid": uid,
+        });
+      } else {
+        await fire
+            .collection("users")
+            .doc(uid)
+            .collection("followings")
+            .doc(userUid)
+            .delete();
+        await fire
+            .collection("users")
+            .doc(userUid)
+            .collection("followers")
+            .doc(uid)
+            .delete();
+      }
+      return true;
+    } catch (err) {
+      return false;
+    }
+  }
+
+  Future<bool> sendPostComplain(
+    String postId,
+    String complain,
+    String author,
+    String sender,
+  ) async {
+    try {
+      String id = Uuid().v1();
+      await fire.collection("PostComplaints").doc(id).set({
+        "postId": postId,
+        "complain": complain,
+        "sender": sender,
+        "author": author,
       });
       return true;
     } catch (err) {

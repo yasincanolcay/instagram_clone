@@ -1,3 +1,5 @@
+// ignore_for_file: prefer_typing_uninitialized_variables
+
 import 'package:audioplayers/audioplayers.dart';
 import 'package:flutter/material.dart';
 import 'package:instagram_clone/resources/audio_players_methods.dart';
@@ -65,8 +67,8 @@ class _MusicTileCardState extends State<MusicTileCard> {
               },
               icon: snapshot.data == PlayerState.playing &&
                       widget.index == widget.selectedIndex
-                  ? Icon(Icons.pause)
-                  : Icon(Icons.play_arrow_rounded),
+                  ? const Icon(Icons.pause)
+                  : const Icon(Icons.play_arrow_rounded),
             ),
           );
         });

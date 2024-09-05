@@ -1,3 +1,5 @@
+// ignore_for_file: prefer_typing_uninitialized_variables
+
 import 'package:flutter/material.dart';
 import 'package:instagram_clone/resources/audio_players_methods.dart';
 import 'package:instagram_clone/screens/posts/music_tile_card.dart';
@@ -31,7 +33,7 @@ class _MusicTileBuilderState extends State<MusicTileBuilder> {
   Widget build(BuildContext context) {
     return ListView.separated(
       shrinkWrap: true,
-      physics: NeverScrollableScrollPhysics(),
+      physics: const NeverScrollableScrollPhysics(),
       itemBuilder: (context, index) {
         return MusicTileCard(
           snapshot: widget.snapshot.data!.docs[index].data(),
@@ -42,7 +44,7 @@ class _MusicTileBuilderState extends State<MusicTileBuilder> {
           setMusic: widget.setMusic,
         );
       },
-      separatorBuilder: (context, index) => Divider(),
+      separatorBuilder: (context, index) => const Divider(),
       itemCount: widget.snapshot.data!.docs.length,
     );
   }

@@ -6,8 +6,10 @@ class SubPhotoScreen extends StatelessWidget {
   const SubPhotoScreen({
     super.key,
     required this.bytes,
+    required this.editMode,
   });
-  final Uint8List bytes;
+  final bytes;
+  final bool editMode;
 
   @override
   Widget build(BuildContext context) {
@@ -19,7 +21,7 @@ class SubPhotoScreen extends StatelessWidget {
         elevation: 0,
       ),
       body: Center(
-        child: Image.memory(bytes),
+        child: !editMode ? Image.memory(bytes) : Image.network(bytes),
       ),
     );
   }

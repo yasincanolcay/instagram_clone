@@ -16,7 +16,10 @@ import 'package:instagram_clone/screens/push/searcher_page.dart';
 import 'package:instagram_clone/utils/colors.dart';
 import 'package:instagram_clone/utils/global_class.dart';
 import 'package:instagram_clone/utils/utils.dart';
+import 'package:instagram_clone/widgets/postwidgets/post_more_sheet.dart';
 import 'package:instagram_clone/widgets/postwidgets/save_post_sheet.dart';
+import 'package:instagram_clone/widgets/postwidgets/tagged_users_sheet.dart';
+import 'package:intl/intl.dart';
 import 'package:share_plus/share_plus.dart';
 import 'package:smooth_page_indicator/smooth_page_indicator.dart';
 import 'package:visibility_detector/visibility_detector.dart';
@@ -24,11 +27,11 @@ import 'package:visibility_detector/visibility_detector.dart';
 class PostCard extends StatefulWidget {
   const PostCard({
     super.key,
-    required this.snap, required this.playerMethods,
+    required this.snap,
+    required this.playerMethods,
   });
   final snap;
   final AudioPlayersMethods playerMethods;
-
 
   @override
   State<PostCard> createState() => _PostCardState();
@@ -98,18 +101,18 @@ class _PostCardState extends State<PostCard> with TickerProviderStateMixin {
   }
 
   void getSavedPost() async {
-    var saveds = await FirebaseFirestore.instance
+    await FirebaseFirestore.instance
         .collection("users")
         .doc(uid)
         .collection("SavedPosts")
         .get()
         .then((value) {
-      value.docs.forEach((element) {
+      for (var element in value.docs) {
         if (element.data()["postId"] == widget.snap["postId"]) {
           isSaved = true;
           setState(() {});
         }
-      });
+      }
     });
   }
 
@@ -264,7 +267,20 @@ class _PostCardState extends State<PostCard> with TickerProviderStateMixin {
               isThreeLine: false,
               subtitle: locationAndMusicChecker(),
               trailing: IconButton(
-                onPressed: () {},
+                onPressed: () {
+                  showModalBottomSheet(
+                      context: context,
+                      shape: const RoundedRectangleBorder(
+                        borderRadius: BorderRadius.vertical(
+                          top: Radius.circular(
+                            25.0,
+                          ),
+                        ),
+                      ),
+                      builder: (context) {
+                        return PostMoreSheet(snap: widget.snap, uid: uid);
+                      });
+                },
                 icon: const Icon(
                   Icons.more_vert_rounded,
                 ),
@@ -329,6 +345,32 @@ class _PostCardState extends State<PostCard> with TickerProviderStateMixin {
                       ),
                     ),
                   ),
+                  widget.snap["users"].isNotEmpty
+                      ? Positioned(
+                          bottom: 8.0,
+                          left: 8.0,
+                          child: IconButton(
+                            onPressed: () {
+                              showModalBottomSheet(
+                                context: context,
+                                shape: const RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.vertical(
+                                    top: Radius.circular(
+                                      25.0,
+                                    ),
+                                  ),
+                                ),
+                                builder: (context) => TaggedUsersSheet(
+                                  snap: widget.snap,
+                                ),
+                              );
+                            },
+                            icon: const Icon(
+                              Icons.people_alt_rounded,
+                            ),
+                          ),
+                        )
+                      : const SizedBox(),
                 ],
               ),
             ),
@@ -433,7 +475,7 @@ class _PostCardState extends State<PostCard> with TickerProviderStateMixin {
                       text: TextSpan(children: [
                         TextSpan(
                           text: "$username ",
-                          style: TextStyle(
+                          style: const TextStyle(
                             color: textColor,
                             fontWeight: FontWeight.bold,
                           ),
@@ -469,6 +511,14 @@ class _PostCardState extends State<PostCard> with TickerProviderStateMixin {
             const Divider(
               thickness: 0.0,
             ),
+            Padding(
+              padding: const EdgeInsets.all(8.0),
+              child: Text(
+                DateFormat.yMMMd().add_EEEE().add_Hm().format(
+                      widget.snap['publishDate'].toDate(),
+                    ),
+              ),
+            ),
           ],
         ),
       ),
@@ -478,7 +528,6 @@ class _PostCardState extends State<PostCard> with TickerProviderStateMixin {
   Widget locationAndMusicChecker() {
     Map location = Map.from(widget.snap["location"]);
     String music = widget.snap["musicName"];
-    String url = widget.snap["music"];
     if (location.isEmpty && music.isEmpty) {
       return const SizedBox();
     } else if (location.isNotEmpty && music.isNotEmpty) {
@@ -487,12 +536,14 @@ class _PostCardState extends State<PostCard> with TickerProviderStateMixin {
         isRepeatingAnimation: true,
         repeatForever: true,
         animatedTexts: [
-          FlickerAnimatedText(location["address"].toString(),
-              textStyle: TextStyle(
-                overflow: TextOverflow.ellipsis,
-              )),
+          FlickerAnimatedText(
+            location["address"].toString(),
+            textStyle: const TextStyle(
+              overflow: TextOverflow.ellipsis,
+            ),
+          ),
           FlickerAnimatedText(music,
-              textStyle: TextStyle(
+              textStyle: const TextStyle(
                 overflow: TextOverflow.ellipsis,
               )),
         ],
@@ -501,9 +552,14 @@ class _PostCardState extends State<PostCard> with TickerProviderStateMixin {
         },
       );
     } else if (location.isNotEmpty && music.isEmpty) {
-      return Text("${location["address"].toString()}");
+      return Text(
+        location["address"].toString(),
+        style: const TextStyle(
+          overflow: TextOverflow.ellipsis,
+        ),
+      );
     } else {
-      return Text("$music");
+      return Text(music);
     }
   }
 }

@@ -89,7 +89,7 @@ class _UsersPickerState extends State<UsersPicker> {
 
                       return ListView.separated(
                         shrinkWrap: true,
-                        physics: NeverScrollableScrollPhysics(),
+                        physics: const NeverScrollableScrollPhysics(),
                         itemBuilder: (context, index) {
                           User user = User.fromSnap(snapshot.data!.docs[index]);
                           return ListTile(
@@ -153,7 +153,7 @@ class _UsersPickerState extends State<UsersPicker> {
                 : const SizedBox(),
             ListView.builder(
               shrinkWrap: true,
-              physics: NeverScrollableScrollPhysics(),
+              physics: const NeverScrollableScrollPhysics(),
               itemCount: users.length,
               itemBuilder: (context, index) {
                 return ListTile(

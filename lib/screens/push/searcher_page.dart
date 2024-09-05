@@ -21,7 +21,6 @@ class _SearcherPageState extends State<SearcherPage> {
   bool isChanged = false;
   @override
   void initState() {
-    // TODO: implement initState
     if (widget.isPost) {
       _controller.text = widget.hashtag;
     }
@@ -84,7 +83,7 @@ class _SearcherPageState extends State<SearcherPage> {
               isPost: widget.isPost,
               hashtag: widget.isPost && !isChanged
                   ? widget.hashtag
-                  : "${_controller.text}",
+                  : _controller.text,
             ),
             const PeoplePage(),
           ],

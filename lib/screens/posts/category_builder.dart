@@ -1,3 +1,5 @@
+// ignore_for_file: unused_local_variable
+
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_staggered_grid_view/flutter_staggered_grid_view.dart';
@@ -94,11 +96,11 @@ class _CategoryBuilderState extends State<CategoryBuilder> {
                                 isClick = false;
                               });
                             },
-                            icon: Icon(
+                            icon: const Icon(
                               Icons.arrow_back_ios_new_rounded,
                             ),
                           ),
-                          Text("Geri Git"),
+                          const Text("Geri Git"),
                         ],
                       ),
                       FutureBuilder(
@@ -129,7 +131,7 @@ class _CategoryBuilderState extends State<CategoryBuilder> {
                     ],
                   ),
                 ))
-          : Center(
+          : const Center(
               child: CircularProgressIndicator(),
             ),
     );

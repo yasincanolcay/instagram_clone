@@ -20,9 +20,9 @@ class _MusicPickerState extends State<MusicPicker> {
       length: 2,
       child: Scaffold(
         appBar: AppBar(
-          leading: Icon(Icons.music_note_rounded),
-          title: Text("Müzik Seçimi"),
-          bottom: TabBar(tabs: [
+          leading: const Icon(Icons.music_note_rounded),
+          title: const Text("Müzik Seçimi"),
+          bottom: const TabBar(tabs: [
             Tab(
                 icon: Icon(
                   Icons.music_note_rounded,

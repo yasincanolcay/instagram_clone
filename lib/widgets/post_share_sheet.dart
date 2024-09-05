@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:insta_assets_picker/insta_assets_picker.dart';
 import 'package:instagram_clone/screens/posts/photo_description_screen.dart';
 import 'package:instagram_clone/utils/colors.dart';
+import 'package:instagram_clone/widgets/postwidgets/sheet_touch_button.dart';
 
 class PostShareSheet extends StatelessWidget {
   const PostShareSheet({super.key});
@@ -13,17 +14,7 @@ class PostShareSheet extends StatelessWidget {
     return Column(
       mainAxisSize: MainAxisSize.min,
       children: [
-        Center(
-          child: Container(
-            width: 50,
-            height: 10,
-            margin: const EdgeInsets.all(10.0),
-            decoration: BoxDecoration(
-              color: textColor,
-              borderRadius: BorderRadius.circular(30),
-            ),
-          ),
-        ),
+        const SheetTouchButton(),
         ListTile(
           onTap: () async {
             // set picker theme based on app theme primary color
@@ -59,6 +50,8 @@ class PostShareSheet extends StatelessWidget {
                   MaterialPageRoute(
                     builder: (context) => PhotoDescriptionScreen(
                       photoStream: _,
+                      editMode: false,
+                      snap: null,
                     ),
                   ),
                 );

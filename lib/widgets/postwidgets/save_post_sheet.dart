@@ -5,6 +5,7 @@ import 'package:flutter/material.dart';
 import 'package:instagram_clone/utils/colors.dart';
 import 'package:instagram_clone/utils/global_class.dart';
 import 'package:instagram_clone/widgets/postwidgets/add_saved_collection.dart';
+import 'package:instagram_clone/widgets/postwidgets/sheet_touch_button.dart';
 
 class SavePostSheet extends StatefulWidget {
   final Function(String collectionName, bool isBack) savePost;
@@ -30,13 +31,13 @@ class _SavePostSheetState extends State<SavePostSheet> {
         .doc(uid)
         .collection("SavedPosts")
         .get();
-    snap!.docs.forEach((element) {
+    for (var element in snap!.docs) {
       if (!collections.contains(element.data()["collectionName"]) &&
           element.data()["collectionName"] != "Kaydedilenler") {
         collections.add(element.data()["collectionName"]);
         setState(() {});
       }
-    });
+    }
     setState(() {});
   }
 
@@ -51,17 +52,7 @@ class _SavePostSheetState extends State<SavePostSheet> {
     return SingleChildScrollView(
       child: Column(
         children: [
-          Center(
-            child: Container(
-              width: 50,
-              height: 10,
-              margin: const EdgeInsets.all(10.0),
-              decoration: BoxDecoration(
-                color: textColor,
-                borderRadius: BorderRadius.circular(30),
-              ),
-            ),
-          ),
+          const SheetTouchButton(),
           GestureDetector(
             onTap: () {
               Navigator.of(context).push(
@@ -127,6 +118,7 @@ class _SavePostSheetState extends State<SavePostSheet> {
     );
   }
 }
+
 
 class SavedPostCollectionCard extends StatefulWidget {
   final String collectionName;

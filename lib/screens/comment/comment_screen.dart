@@ -86,7 +86,6 @@ class _CommentScreenState extends State<CommentScreen> {
 
   @override
   void initState() {
-    // TODO: implement initState
     future = FirebaseFirestore.instance
         .collection("Posts")
         .doc(widget.snap["postId"])

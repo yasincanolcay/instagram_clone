@@ -1,10 +1,12 @@
+// ignore_for_file: prefer_typing_uninitialized_variables
+
 import 'package:flutter/material.dart';
 import 'package:instagram_clone/resources/audio_players_methods.dart';
 import 'package:instagram_clone/utils/colors.dart';
 import 'package:instagram_clone/widgets/postwidgets/post_card.dart';
 
 class PostViewerPage extends StatefulWidget {
-   PostViewerPage({
+   const PostViewerPage({
     super.key,
     required this.snap,
   });
@@ -25,7 +27,7 @@ class _PostViewerPageState extends State<PostViewerPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text(
+        title: const Text(
           "Gönderi",
           style: TextStyle(
             color: textColor,
