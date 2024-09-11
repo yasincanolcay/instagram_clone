@@ -80,7 +80,7 @@ class _MobileLayoutState extends State<MobileLayout> {
                   context: context,
                   backgroundColor: Colors.white,
                   builder: (context) {
-                    return const PostShareSheet();
+                    return PostShareSheet();
                   },
                 );
               },

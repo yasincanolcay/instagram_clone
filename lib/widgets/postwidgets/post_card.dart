@@ -22,6 +22,7 @@ import 'package:instagram_clone/widgets/postwidgets/tagged_users_sheet.dart';
 import 'package:intl/intl.dart';
 import 'package:share_plus/share_plus.dart';
 import 'package:smooth_page_indicator/smooth_page_indicator.dart';
+import 'package:video_player/video_player.dart';
 import 'package:visibility_detector/visibility_detector.dart';
 
 class PostCard extends StatefulWidget {
@@ -38,6 +39,7 @@ class PostCard extends StatefulWidget {
 }
 
 class _PostCardState extends State<PostCard> with TickerProviderStateMixin {
+  VideoPlayerController? _videoPlayerController;
   late AnimationController _controller;
   late Animation<double> _animation;
   String uid = FirebaseAuth.instance.currentUser!.uid;
@@ -58,7 +60,9 @@ class _PostCardState extends State<PostCard> with TickerProviderStateMixin {
     username = userSnap.data()!["username"];
     profilePhoto = userSnap.data()!["profilePhoto"];
     verified = userSnap.data()!["verified"];
-    setState(() {});
+    if (mounted) {
+      setState(() {});
+    }
     getSavedPost(); //kaydedilenler alındı
     //username yazılacak
     //extra: yorum ve yanıt sil işlemi
@@ -96,7 +100,9 @@ class _PostCardState extends State<PostCard> with TickerProviderStateMixin {
         likedList.add(element["uid"]);
       }
     });
-    setState(() {});
+    if (mounted) {
+      setState(() {});
+    }
     getUserData();
   }
 
@@ -139,12 +145,27 @@ class _PostCardState extends State<PostCard> with TickerProviderStateMixin {
       }
     });
     getPostdata();
+    if (widget.snap["type"] == "reels") {
+      _videoPlayerController =
+          VideoPlayerController.networkUrl(Uri.parse(widget.snap["contentUrl"]),
+              videoPlayerOptions: VideoPlayerOptions(
+                mixWithOthers: true,
+              ))
+            ..initialize().then((value) {
+              setState(() {});
+              _videoPlayerController!.setLooping(true);
+            });
+    }
     super.initState();
   }
 
   void savePost(String collectionName, bool isBack) async {
-    bool response = await FirebaseMethods().savePost(widget.snap["postId"],
-        collectionName, widget.snap['contentUrl'][photoSelectedIndex]);
+    bool response = await FirebaseMethods().savePost(
+        widget.snap["postId"],
+        collectionName,
+        widget.snap["type"] == "photo"
+            ? widget.snap['contentUrl'][photoSelectedIndex]
+            : widget.snap["thumbnail"]);
     if (!response) {
       if (mounted) {
         Utils().showSnackBar(
@@ -171,7 +192,9 @@ class _PostCardState extends State<PostCard> with TickerProviderStateMixin {
             ),
             builder: (context) => SavePostSheet(
               savePost: savePost,
-              thumbnail: widget.snap['contentUrl'][photoSelectedIndex],
+              thumbnail: widget.snap["type"] == "photo"
+                  ? widget.snap['contentUrl'][photoSelectedIndex]
+                  : widget.snap["thumbnail"],
             ),
           );
         }
@@ -204,6 +227,9 @@ class _PostCardState extends State<PostCard> with TickerProviderStateMixin {
   void dispose() {
     _controller.dispose();
     widget.playerMethods.stop();
+    if (_videoPlayerController != null) {
+      _videoPlayerController!.dispose();
+    }
     super.dispose();
   }
 
@@ -214,16 +240,34 @@ class _PostCardState extends State<PostCard> with TickerProviderStateMixin {
       onVisibilityChanged: (i) async {
         String music = widget.snap["musicName"];
         String url = widget.snap["music"];
+        var visiblePercentage = i.visibleFraction * 100;
+
         if (music.isNotEmpty) {
-          var visiblePercentage = i.visibleFraction * 100;
+          print(visiblePercentage);
           if (visiblePercentage == 100.0) {
-            widget.playerMethods.player.setReleaseMode(ReleaseMode.loop);
-            widget.playerMethods.playMusic(UrlSource(url));
+            if (widget.snap["type"] == "photo") {
+              widget.playerMethods.player.setReleaseMode(ReleaseMode.loop);
+              widget.playerMethods.playMusic(UrlSource(url));
+            }
           } else if (visiblePercentage >= 60.0 && visiblePercentage <= 80.0) {
-            widget.playerMethods.player.stop();
+            if (widget.snap["type"] == "photo") {
+              widget.playerMethods.player.stop();
+            }
           }
           if (i.visibleFraction == 0 && mounted) {
-            widget.playerMethods.player.stop();
+            if (widget.snap["type"] == "photo") {
+              widget.playerMethods.player.stop();
+            }
+          }
+        } else if (widget.snap["type"] == "reels") {
+          if (visiblePercentage > 70) {
+            if (_videoPlayerController!.value.isInitialized) {
+              _videoPlayerController!.play();
+            }
+          } else {
+            if (_videoPlayerController!.value.isInitialized) {
+              _videoPlayerController!.pause();
+            }
           }
         }
       },
@@ -234,58 +278,60 @@ class _PostCardState extends State<PostCard> with TickerProviderStateMixin {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            ListTile(
-              dense: true,
-              leading: profilePhoto != ""
-                  ? CircleAvatar(
-                      backgroundImage: CachedNetworkImageProvider(
-                        profilePhoto,
-                        cacheManager: GlobalClass.customCacheManager,
-                      ),
-                    )
-                  : const CircleAvatar(),
-              title: Row(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  Text(
-                    username,
-                    style: const TextStyle(
-                      fontFamily: "Poppins",
-                    ),
-                  ),
-                  verified
-                      ? const Padding(
-                          padding: EdgeInsets.only(left: 4.0),
-                          child: Icon(
-                            Icons.verified,
-                            color: Colors.blue,
-                          ),
-                        )
-                      : const SizedBox(),
-                ],
-              ),
-              isThreeLine: false,
-              subtitle: locationAndMusicChecker(),
-              trailing: IconButton(
-                onPressed: () {
-                  showModalBottomSheet(
-                      context: context,
-                      shape: const RoundedRectangleBorder(
-                        borderRadius: BorderRadius.vertical(
-                          top: Radius.circular(
-                            25.0,
+            widget.snap["type"] == "photo"
+                ? ListTile(
+                    dense: true,
+                    leading: profilePhoto != ""
+                        ? CircleAvatar(
+                            backgroundImage: CachedNetworkImageProvider(
+                              profilePhoto,
+                              cacheManager: GlobalClass.customCacheManager,
+                            ),
+                          )
+                        : const CircleAvatar(),
+                    title: Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Text(
+                          username,
+                          style: const TextStyle(
+                            fontFamily: "Poppins",
                           ),
                         ),
+                        verified
+                            ? const Padding(
+                                padding: EdgeInsets.only(left: 4.0),
+                                child: Icon(
+                                  Icons.verified,
+                                  color: Colors.blue,
+                                ),
+                              )
+                            : const SizedBox(),
+                      ],
+                    ),
+                    isThreeLine: false,
+                    subtitle: locationAndMusicChecker(),
+                    trailing: IconButton(
+                      onPressed: () {
+                        showModalBottomSheet(
+                            context: context,
+                            shape: const RoundedRectangleBorder(
+                              borderRadius: BorderRadius.vertical(
+                                top: Radius.circular(
+                                  25.0,
+                                ),
+                              ),
+                            ),
+                            builder: (context) {
+                              return PostMoreSheet(snap: widget.snap, uid: uid);
+                            });
+                      },
+                      icon: const Icon(
+                        Icons.more_vert_rounded,
                       ),
-                      builder: (context) {
-                        return PostMoreSheet(snap: widget.snap, uid: uid);
-                      });
-                },
-                icon: const Icon(
-                  Icons.more_vert_rounded,
-                ),
-              ),
-            ),
+                    ),
+                  )
+                : SizedBox(),
             GestureDetector(
               onDoubleTap: () {
                 _controller.forward();
@@ -296,41 +342,113 @@ class _PostCardState extends State<PostCard> with TickerProviderStateMixin {
               child: Stack(
                 alignment: Alignment.center,
                 children: [
-                  ExpandablePageView(
-                    onPageChanged: (value) {
-                      setState(() {
-                        photoCurrentIndex = value.toDouble();
-                        photoSelectedIndex = value;
-                      });
-                    },
-                    children: List.generate(
-                      widget.snap["contentUrl"].length,
-                      (index) => CachedNetworkImage(
-                        cacheManager: GlobalClass.customCacheManager,
-                        key: UniqueKey(),
-                        memCacheHeight: 800,
-                        imageUrl: widget.snap['contentUrl'][index],
-                        fit: BoxFit.cover,
-                        filterQuality: FilterQuality.high,
-                        errorWidget: (context, error, stackTrace) {
-                          return Center(
-                            child: Image.asset(
-                              'assets/images/error.png',
+                  widget.snap["type"] == "photo"
+                      ? ExpandablePageView(
+                          onPageChanged: (value) {
+                            setState(() {
+                              photoCurrentIndex = value.toDouble();
+                              photoSelectedIndex = value;
+                            });
+                          },
+                          children: List.generate(
+                            widget.snap["contentUrl"].length,
+                            (index) => CachedNetworkImage(
+                              cacheManager: GlobalClass.customCacheManager,
+                              key: UniqueKey(),
+                              memCacheHeight: 800,
+                              imageUrl: widget.snap['contentUrl'][index],
                               fit: BoxFit.cover,
-                              width: 100,
-                              height: 100,
+                              filterQuality: FilterQuality.high,
+                              errorWidget: (context, error, stackTrace) {
+                                return Center(
+                                  child: Image.asset(
+                                    'assets/images/error.png',
+                                    fit: BoxFit.cover,
+                                    width: 100,
+                                    height: 100,
+                                  ),
+                                );
+                              },
+                              progressIndicatorBuilder:
+                                  (context, url, downloadProgress) => Center(
+                                child: CircularProgressIndicator(
+                                  value: downloadProgress.progress,
+                                ),
+                              ),
                             ),
-                          );
-                        },
-                        progressIndicatorBuilder:
-                            (context, url, downloadProgress) => Center(
-                          child: CircularProgressIndicator(
-                            value: downloadProgress.progress,
                           ),
+                        )
+                      : SizedBox(
+                          child: _videoPlayerController!.value.isInitialized
+                              ? AspectRatio(
+                                  aspectRatio:
+                                      _videoPlayerController!.value.aspectRatio,
+                                  child: VideoPlayer(_videoPlayerController!),
+                                )
+                              : SizedBox(),
                         ),
-                      ),
-                    ),
-                  ),
+                  widget.snap["type"] == "reels"
+                      ? Positioned(
+                          top: 8.0,
+                          left: 8.0,
+                          right: 8.0,
+                          child: ListTile(
+                            dense: true,
+                            leading: profilePhoto != ""
+                                ? CircleAvatar(
+                                    backgroundImage: CachedNetworkImageProvider(
+                                      profilePhoto,
+                                      cacheManager:
+                                          GlobalClass.customCacheManager,
+                                    ),
+                                  )
+                                : const CircleAvatar(),
+                            title: Row(
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                Text(
+                                  username,
+                                  style: const TextStyle(
+                                    fontFamily: "poppins1",
+                                  ),
+                                ),
+                                verified
+                                    ? const Padding(
+                                        padding: EdgeInsets.only(left: 4.0),
+                                        child: Icon(
+                                          Icons.verified,
+                                          color: Colors.blue,
+                                        ),
+                                      )
+                                    : const SizedBox(),
+                              ],
+                            ),
+                            isThreeLine: false,
+                            subtitle: locationAndMusicChecker(),
+                            trailing: IconButton(
+                              onPressed: () {
+                                showModalBottomSheet(
+                                    context: context,
+                                    shape: const RoundedRectangleBorder(
+                                      borderRadius: BorderRadius.vertical(
+                                        top: Radius.circular(
+                                          25.0,
+                                        ),
+                                      ),
+                                    ),
+                                    builder: (context) {
+                                      return PostMoreSheet(
+                                          snap: widget.snap, uid: uid);
+                                    });
+                              },
+                              icon: const Icon(
+                                Icons.more_vert_rounded,
+                                color: textColor,
+                              ),
+                            ),
+                          ),
+                        )
+                      : SizedBox(),
                   Center(
                     child: AnimatedOpacity(
                       opacity: 1.0,
@@ -367,10 +485,35 @@ class _PostCardState extends State<PostCard> with TickerProviderStateMixin {
                             },
                             icon: const Icon(
                               Icons.people_alt_rounded,
+                              color: textColor,
                             ),
                           ),
                         )
                       : const SizedBox(),
+                  widget.snap["type"] == "reels"
+                      ? Positioned(
+                          right: 8.0,
+                          bottom: 8.0,
+                          child: IconButton(
+                            onPressed: () {
+                              setState(() {
+                                if (_videoPlayerController!.value.volume >
+                                    0.0) {
+                                  _videoPlayerController!.setVolume(0.0);
+                                } else {
+                                  _videoPlayerController!.setVolume(1.0);
+                                }
+                              });
+                            },
+                            icon: Icon(
+                              _videoPlayerController!.value.volume > 0.0
+                                  ? Icons.volume_up
+                                  : Icons.volume_off,
+                              color: textColor,
+                            ),
+                          ),
+                        )
+                      : SizedBox(),
                 ],
               ),
             ),
@@ -407,7 +550,9 @@ class _PostCardState extends State<PostCard> with TickerProviderStateMixin {
                 IconButton(
                   onPressed: () async {
                     await Share.share(
-                      widget.snap['contentUrl'][photoSelectedIndex],
+                      widget.snap["type"] == "photo"
+                          ? widget.snap['contentUrl'][photoSelectedIndex]
+                          : widget.snap['contentUrl'],
                       subject:
                           "İnstagram Klonu uygulamasını indir ve daha fazla keşfet!",
                     );
@@ -420,18 +565,20 @@ class _PostCardState extends State<PostCard> with TickerProviderStateMixin {
                   ),
                 ),
                 const Spacer(),
-                SmoothIndicator(
-                  offset: photoCurrentIndex, //değişim yapıacagız
-                  count: widget.snap["contentUrl"].length,
-                  size: const Size(10, 10),
-                  effect: const ScrollingDotsEffect(
-                    activeDotColor: textColor,
-                    activeStrokeWidth: 0.5,
-                    dotHeight: 8,
-                    dotWidth: 8,
-                    fixedCenter: true,
-                  ),
-                ),
+                widget.snap["type"] == "photo"
+                    ? SmoothIndicator(
+                        offset: photoCurrentIndex, //değişim yapıacagız
+                        count: widget.snap["contentUrl"].length,
+                        size: const Size(10, 10),
+                        effect: const ScrollingDotsEffect(
+                          activeDotColor: textColor,
+                          activeStrokeWidth: 0.5,
+                          dotHeight: 8,
+                          dotWidth: 8,
+                          fixedCenter: true,
+                        ),
+                      )
+                    : SizedBox(),
                 const Spacer(
                   flex: 2,
                 ),

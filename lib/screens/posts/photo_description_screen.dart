@@ -376,6 +376,28 @@ class _PhotoDescriptionScreenState extends State<PhotoDescriptionScreen> {
                           Icons.arrow_forward_ios_rounded,
                         ),
                       ),
+                      Divider(),
+                      SwitchListTile(
+                        value: isComment,
+                        onChanged: (value) {
+                          setState(() {
+                            isComment = value;
+                          });
+                        },
+                        title: Text("Gönderi Yorumları"),
+                      ),
+                      SwitchListTile(
+                        value: isDownload,
+                        onChanged: (value) {
+                          setState(() {
+                            isDownload = value;
+                          });
+                        },
+                        title: Text("İndirmeler"),
+                      ),
+                      SizedBox(
+                        height: 80,
+                      ),
                     ],
                   ),
                 ),
@@ -593,6 +615,28 @@ class _PhotoDescriptionScreenState extends State<PhotoDescriptionScreen> {
                     trailing: const Icon(
                       Icons.arrow_forward_ios_rounded,
                     ),
+                  ),
+                  Divider(),
+                  SwitchListTile(
+                    value: isComment,
+                    onChanged: (value) {
+                      setState(() {
+                        isComment = value;
+                      });
+                    },
+                    title: Text("Gönderi Yorumları"),
+                  ),
+                  SwitchListTile(
+                    value: isDownload,
+                    onChanged: (value) {
+                      setState(() {
+                        isDownload = value;
+                      });
+                    },
+                    title: Text("İndirmeler"),
+                  ),
+                  SizedBox(
+                    height: 80,
                   ),
                 ],
               ),

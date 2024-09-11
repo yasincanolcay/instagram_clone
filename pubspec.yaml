@@ -39,6 +39,12 @@ dependencies:
   flutter_map_location_marker: ^8.0.2
   audioplayers: ^5.2.1
   visibility_detector: ^0.4.0+2
+  video_editor: ^3.0.0
+  ffmpeg_kit_flutter: ^6.0.3
+  cloudinary: ^1.2.0
+  cloudinary_public: ^0.23.1
+  video_player: ^2.8.1
+
 dev_dependencies:
   flutter_test:
     sdk: flutter

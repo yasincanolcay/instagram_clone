@@ -1,13 +1,18 @@
 import 'dart:typed_data';
-
+import 'package:cloudinary_public/cloudinary_public.dart' as cloudPublic;
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_storage/firebase_storage.dart';
+import 'package:flutter/material.dart';
 import 'package:instagram_clone/models/answer.dart';
 import 'package:instagram_clone/models/comment.dart';
 import 'package:instagram_clone/models/post.dart';
+import 'package:instagram_clone/models/reel.dart';
 import 'package:instagram_clone/resources/storage_methods.dart';
+import 'package:instagram_clone/utils/colors.dart';
+import 'package:instagram_clone/utils/utils.dart';
 import 'package:uuid/uuid.dart';
+import 'package:cloudinary/cloudinary.dart';
 
 class FirebaseMethods {
   final fire = FirebaseFirestore.instance;
@@ -54,6 +59,78 @@ class FirebaseMethods {
       await fire.collection("Posts").doc(id).set(post.toJson());
       return true;
     } catch (err) {
+      return false;
+    }
+  }
+
+  Future<bool> uploadReels(
+    String filePath,
+    String thumbnail,
+    String description,
+    String author,
+    List hastags,
+    bool isComment,
+    bool isDownload,
+    String music,
+    DateTime publishDate,
+    String type,
+    Map location,
+    List<Map> users,
+  ) async {
+    try {
+      final cloudinary = cloudPublic.CloudinaryPublic(
+        'dyauibzig',
+        'bwyx9qsv',
+        cache: false,
+      );
+      final res = await cloudinary.uploadFileInChunks(
+        cloudPublic.CloudinaryFile.fromFile(
+          filePath,
+          folder: 'public',
+        ),
+        chunkSize: 10000000,
+        onProgress: (count, total) {
+          //uploadingPercentage = (count / total) * 100; sonra yüzdeyi alırız.
+          //print("Video: ${(count / total) * 100}");
+        },
+      );
+      cloudPublic.CloudinaryResponse response = await cloudinary.uploadFile(
+        cloudPublic.CloudinaryFile.fromFile(
+          thumbnail,
+          resourceType: cloudPublic.CloudinaryResourceType.Image,
+        ),
+        onProgress: (count, total) {
+          //print("Thumbnail: ${(count / total) * 100}");
+        },
+      );
+      if (res!.data.isNotEmpty && response.data.isNotEmpty) {
+        String postId = const Uuid().v1();
+        Reel post = Reel(
+          description: description,
+          author: author,
+          contentUrl: res.url,
+          hastags: hastags,
+          isComment: isComment,
+          isDownload: isDownload,
+          music: music,
+          postId: postId,
+          publishDate: publishDate,
+          type: type,
+          verified: true,
+          thumbnail: response.secureUrl,
+          deleteToken: [res.publicId, response.publicId],
+          location: location,
+          users: users,
+          musicData: {},
+          musicName: "",
+        );
+        await fire.collection('Posts')
+          ..doc(postId).set(post.toJson());
+        return true;
+      } else {
+        return false;
+      }
+    } catch (er) {
       return false;
     }
   }
@@ -325,7 +402,7 @@ class FirebaseMethods {
     }
   }
 
-  Future<bool> deletePost(Map snap) async {
+  Future<bool> deletePost(Map snap, BuildContext context) async {
     try {
       if (snap["type"] == "photo") {
         for (int i = 0; i < snap["contentUrl"].length; i++) {
@@ -334,7 +411,27 @@ class FirebaseMethods {
           await photoRef.delete();
         }
       } else {
-        //reels silecegiz
+        final cloudinary = Cloudinary.signedConfig(
+          cloudName: "dyauibzig",
+          apiKey: "957237589686648",
+          apiSecret: "FF7bOxVtNuvQHZsG9y-sz-p4eF4",
+        );
+        final response = await cloudinary.destroy(
+          snap["deleteToken"][0],
+          url: snap["contentUrl"],
+          resourceType: CloudinaryResourceType.video,
+          invalidate: true,
+        );
+        final thumbResponse = await cloudinary.destroy(
+          snap["deleteToken"][1],
+          url: snap["thumbnail"],
+          resourceType: CloudinaryResourceType.image,
+          invalidate: true,
+        );
+        if (!response.isSuccessful && !thumbResponse.isSuccessful) {
+          Utils().showSnackBar(
+              "Video içeriği silinemedi", context, backgroundColor);
+        }
       }
       await fire.collection("Posts").doc(snap["postId"]).delete();
       return true;

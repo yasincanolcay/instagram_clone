@@ -4,6 +4,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:instagram_clone/resources/firebase_methods.dart';
 import 'package:instagram_clone/screens/posts/photo_description_screen.dart';
+import 'package:instagram_clone/screens/posts/reels_description_page.dart';
 import 'package:instagram_clone/utils/colors.dart';
 import 'package:instagram_clone/utils/utils.dart';
 import 'package:instagram_clone/widgets/postwidgets/delete_warning.dart';
@@ -29,7 +30,7 @@ class _PostMoreSheetState extends State<PostMoreSheet> {
   List<String> followings = [];
   Map userSnap = {};
   void deletePost() async {
-    bool response = await FirebaseMethods().deletePost(widget.snap);
+    bool response = await FirebaseMethods().deletePost(widget.snap, context);
     if (response) {
       if (mounted) {
         Utils().showSnackBar("Bu gönderi silindi!", context, backgroundColor);
@@ -99,6 +100,17 @@ class _PostMoreSheetState extends State<PostMoreSheet> {
                           photoStream: null,
                           snap: widget.snap,
                           editMode: true,
+                        ),
+                      ),
+                    );
+                  } else {
+                    Navigator.of(context).push(
+                      MaterialPageRoute(
+                        builder: (context) => ReelsDescriptionScreen(
+                          snap: widget.snap,
+                          editMode: true,
+                          thumbnail: "",
+                          videoFile: null,
                         ),
                       ),
                     );
