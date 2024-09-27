@@ -66,11 +66,13 @@ class _ReelsDescriptionScreenState extends State<ReelsDescriptionScreen> {
         Navigator.pop(context);
       }
     } else {
-      Utils().showSnackBar(
-          "Reels videon yüklenemedi tekrar dene!", context, redColor);
-      setState(() {
-        isUploading = false;
-      });
+      if (mounted) {
+        Utils().showSnackBar(
+            "Reels videon yüklenemedi tekrar dene!", context, redColor);
+        setState(() {
+          isUploading = false;
+        });
+      }
     }
   }
 
@@ -186,7 +188,7 @@ class _ReelsDescriptionScreenState extends State<ReelsDescriptionScreen> {
                           child: VideoPlayer(_videoPlayerController),
                         ),
                       )
-                    : SizedBox(),
+                    : const SizedBox(),
               ), //video oynatıcı gelecek
             ),
             const Divider(
@@ -271,7 +273,7 @@ class _ReelsDescriptionScreenState extends State<ReelsDescriptionScreen> {
                 Icons.arrow_forward_ios_rounded,
               ),
             ),
-            Divider(),
+            const Divider(),
             SwitchListTile(
               value: isComment,
               onChanged: (value) {
@@ -279,7 +281,7 @@ class _ReelsDescriptionScreenState extends State<ReelsDescriptionScreen> {
                   isComment = value;
                 });
               },
-              title: Text("Gönderi Yorumları"),
+              title: const Text("Gönderi Yorumları"),
             ),
             SwitchListTile(
               value: isDownload,
@@ -288,9 +290,9 @@ class _ReelsDescriptionScreenState extends State<ReelsDescriptionScreen> {
                   isDownload = value;
                 });
               },
-              title: Text("İndirmeler"),
+              title: const Text("İndirmeler"),
             ),
-            SizedBox(
+            const SizedBox(
               height: 80,
             ),
           ],
@@ -319,7 +321,7 @@ class _ReelsDescriptionScreenState extends State<ReelsDescriptionScreen> {
           child: !isUploading
               ? Text(
                   widget.editMode ? "Gönderiyi Kaydet" : "Reels Paylaş",
-                  style: TextStyle(
+                  style: const TextStyle(
                     color: Colors.white,
                   ),
                 )

@@ -85,7 +85,9 @@ class _SearcherPageState extends State<SearcherPage> {
                   ? widget.hashtag
                   : _controller.text,
             ),
-            const PeoplePage(),
+            PeoplePage(
+              value: _controller.text,
+            ),
           ],
         ),
       ),

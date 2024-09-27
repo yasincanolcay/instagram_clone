@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 const Color textColor = Colors.black;
+const Color textWhiteColor = Colors.white;
 const Color backgroundColor = Colors.white70;
 const Color textFieldColor = Color.fromARGB(28, 0, 0, 0);
 const Color borderColor = Color.fromARGB(132, 0, 0, 0);

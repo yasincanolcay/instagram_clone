@@ -87,10 +87,39 @@ class _HashtagPageState extends State<HashtagPage> {
                           ),
                         );
                       },
-                      child: Image.network(
-                        data["contentUrl"][0],
-                        fit: BoxFit.cover,
-                      ),
+                      child: data["type"] == "photo"
+                          ? Image.network(
+                              data["contentUrl"][0],
+                              fit: BoxFit.cover,
+                            )
+                          : Stack(
+                              fit: StackFit.expand,
+                              children: [
+                                Image.network(
+                                  data["thumbnail"],
+                                  fit: BoxFit.cover,
+                                ),
+                                const Positioned(
+                                  bottom: 8.0,
+                                  left: 8.0,
+                                  child: Row(
+                                    children: [
+                                      Icon(
+                                        Icons.play_arrow_rounded,
+                                        color: Colors.white,
+                                      ),
+                                      Text(
+                                        "Reel",
+                                        style: TextStyle(
+                                          fontFamily: "poppins1",
+                                          color: Colors.white,
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                              ],
+                            ),
                     );
                   },
                 );

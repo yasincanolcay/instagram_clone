@@ -33,6 +33,7 @@ class _MobileLayoutState extends State<MobileLayout> {
       body: PageView(
         controller: _pageController,
         onPageChanged: onChangedPage,
+        physics: const NeverScrollableScrollPhysics(),
         children: const [
           //buraya sayfalar gelecek
           Feed(),

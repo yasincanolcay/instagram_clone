@@ -12,9 +12,10 @@ import '../../models/comment.dart';
 class CommentScreen extends StatefulWidget {
   const CommentScreen({
     super.key,
-    required this.snap,
+    required this.snap, required this.isReelsPage,
   });
   final snap;
+  final bool isReelsPage;
 
   @override
   State<CommentScreen> createState() => _CommentScreenState();
@@ -100,6 +101,7 @@ class _CommentScreenState extends State<CommentScreen> {
       resizeToAvoidBottomInset: true,
       extendBody: true,
       appBar: AppBar(
+        automaticallyImplyLeading: !widget.isReelsPage,
         title: const Text("Yorumlar"),
       ),
       body: FutureBuilder(

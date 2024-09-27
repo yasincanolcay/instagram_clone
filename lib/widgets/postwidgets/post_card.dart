@@ -116,7 +116,9 @@ class _PostCardState extends State<PostCard> with TickerProviderStateMixin {
       for (var element in value.docs) {
         if (element.data()["postId"] == widget.snap["postId"]) {
           isSaved = true;
-          setState(() {});
+          if (mounted) {
+            setState(() {});
+          }
         }
       }
     });
@@ -295,7 +297,7 @@ class _PostCardState extends State<PostCard> with TickerProviderStateMixin {
                         Text(
                           username,
                           style: const TextStyle(
-                            fontFamily: "Poppins",
+                            fontFamily: "poppins1",
                           ),
                         ),
                         verified
@@ -539,6 +541,7 @@ class _PostCardState extends State<PostCard> with TickerProviderStateMixin {
                       MaterialPageRoute(
                         builder: (context) => CommentScreen(
                           snap: widget.snap,
+                          isReelsPage: false,
                         ),
                       ),
                     );
