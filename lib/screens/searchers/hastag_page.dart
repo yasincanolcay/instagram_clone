@@ -5,6 +5,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_staggered_grid_view/flutter_staggered_grid_view.dart';
 import 'package:instagram_clone/screens/push/post_viewer_page.dart';
 import 'package:instagram_clone/utils/colors.dart';
+import 'package:instagram_clone/widgets/postwidgets/post_grid_card.dart';
 
 class HashtagPage extends StatefulWidget {
   HashtagPage({
@@ -77,50 +78,7 @@ class _HashtagPageState extends State<HashtagPage> {
                   itemBuilder: (context, index) {
                     Map<String, dynamic> data =
                         snapshot.data!.docs[index].data();
-                    return GestureDetector(
-                      onTap: () {
-                        Navigator.of(context).push(
-                          MaterialPageRoute(
-                            builder: (context) => PostViewerPage(
-                              snap: data,
-                            ),
-                          ),
-                        );
-                      },
-                      child: data["type"] == "photo"
-                          ? Image.network(
-                              data["contentUrl"][0],
-                              fit: BoxFit.cover,
-                            )
-                          : Stack(
-                              fit: StackFit.expand,
-                              children: [
-                                Image.network(
-                                  data["thumbnail"],
-                                  fit: BoxFit.cover,
-                                ),
-                                const Positioned(
-                                  bottom: 8.0,
-                                  left: 8.0,
-                                  child: Row(
-                                    children: [
-                                      Icon(
-                                        Icons.play_arrow_rounded,
-                                        color: Colors.white,
-                                      ),
-                                      Text(
-                                        "Reel",
-                                        style: TextStyle(
-                                          fontFamily: "poppins1",
-                                          color: Colors.white,
-                                        ),
-                                      ),
-                                    ],
-                                  ),
-                                ),
-                              ],
-                            ),
-                    );
+                    return PostGridCard(data: data);
                   },
                 );
               },

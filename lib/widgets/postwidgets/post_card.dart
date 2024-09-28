@@ -12,6 +12,7 @@ import 'package:hashtagable_v3/hashtagable.dart';
 import 'package:instagram_clone/resources/audio_players_methods.dart';
 import 'package:instagram_clone/resources/firebase_methods.dart';
 import 'package:instagram_clone/screens/comment/comment_screen.dart';
+import 'package:instagram_clone/screens/pageviewer_screens/profilePage/profile_page.dart';
 import 'package:instagram_clone/screens/push/searcher_page.dart';
 import 'package:instagram_clone/utils/colors.dart';
 import 'package:instagram_clone/utils/global_class.dart';
@@ -282,6 +283,15 @@ class _PostCardState extends State<PostCard> with TickerProviderStateMixin {
           children: [
             widget.snap["type"] == "photo"
                 ? ListTile(
+                    onTap: () {
+                      Navigator.of(context).push(
+                        MaterialPageRoute(
+                          builder: (context) => ProfilePage(
+                            uid: widget.snap["author"],
+                          ),
+                        ),
+                      );
+                    },
                     dense: true,
                     leading: profilePhoto != ""
                         ? CircleAvatar(
@@ -333,7 +343,7 @@ class _PostCardState extends State<PostCard> with TickerProviderStateMixin {
                       ),
                     ),
                   )
-                : SizedBox(),
+                : const SizedBox(),
             GestureDetector(
               onDoubleTap: () {
                 _controller.forward();
@@ -387,7 +397,7 @@ class _PostCardState extends State<PostCard> with TickerProviderStateMixin {
                                       _videoPlayerController!.value.aspectRatio,
                                   child: VideoPlayer(_videoPlayerController!),
                                 )
-                              : SizedBox(),
+                              : const SizedBox(),
                         ),
                   widget.snap["type"] == "reels"
                       ? Positioned(
@@ -395,6 +405,15 @@ class _PostCardState extends State<PostCard> with TickerProviderStateMixin {
                           left: 8.0,
                           right: 8.0,
                           child: ListTile(
+                            onTap: () {
+                              Navigator.of(context).push(
+                                MaterialPageRoute(
+                                  builder: (context) => ProfilePage(
+                                    uid: widget.snap["author"],
+                                  ),
+                                ),
+                              );
+                            },
                             dense: true,
                             leading: profilePhoto != ""
                                 ? CircleAvatar(
@@ -450,7 +469,7 @@ class _PostCardState extends State<PostCard> with TickerProviderStateMixin {
                             ),
                           ),
                         )
-                      : SizedBox(),
+                      : const SizedBox(),
                   Center(
                     child: AnimatedOpacity(
                       opacity: 1.0,
@@ -515,7 +534,7 @@ class _PostCardState extends State<PostCard> with TickerProviderStateMixin {
                             ),
                           ),
                         )
-                      : SizedBox(),
+                      : const SizedBox(),
                 ],
               ),
             ),
@@ -581,7 +600,7 @@ class _PostCardState extends State<PostCard> with TickerProviderStateMixin {
                           fixedCenter: true,
                         ),
                       )
-                    : SizedBox(),
+                    : const SizedBox(),
                 const Spacer(
                   flex: 2,
                 ),

@@ -499,4 +499,23 @@ class FirebaseMethods {
       return false;
     }
   }
+
+  Future<bool> editProfile(String uid, String username, String bio,
+      Uint8List? image, String profilePhoto) async {
+    try {
+      String profilePhotoUrl = profilePhoto;
+      if (image != null) {
+        profilePhotoUrl = await StorageMethods()
+            .uploadImageToStorage("ProfilePhotos", image, false);
+      }
+      await fire.collection("users").doc(uid).update({
+        "username": username,
+        "bio": bio,
+        "profilePhoto": profilePhotoUrl,
+      });
+      return true;
+    } catch (err) {
+      return false;
+    }
+  }
 }

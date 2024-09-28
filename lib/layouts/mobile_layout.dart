@@ -1,3 +1,4 @@
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:instagram_clone/screens/pageviewer_screens/feed.dart';
 import 'package:instagram_clone/screens/pageviewer_screens/profilePage/profile_page.dart';
@@ -14,6 +15,7 @@ class MobileLayout extends StatefulWidget {
 }
 
 class _MobileLayoutState extends State<MobileLayout> {
+  String uid = FirebaseAuth.instance.currentUser!.uid;
   final PageController _pageController = PageController();
   int _page = 0;
   void onChangedPage(int page) {
@@ -34,12 +36,14 @@ class _MobileLayoutState extends State<MobileLayout> {
         controller: _pageController,
         onPageChanged: onChangedPage,
         physics: const NeverScrollableScrollPhysics(),
-        children: const [
+        children:  [
           //buraya sayfalar gelecek
-          Feed(),
-          SearchPage(),
-          ReelsPage(),
-          ProfilePage(),
+          const Feed(),
+          const SearchPage(),
+          const ReelsPage(),
+          ProfilePage(
+            uid: uid,
+          ),
         ],
       ),
       bottomNavigationBar: Container(

@@ -573,7 +573,7 @@ class _ReelsVideoCardState extends State<ReelsVideoCard> {
                                 _videoPlayerController!.play();
                               });
                             },
-                            child: Text(" Daha Fazla"),
+                            child: const Text(" Daha Fazla"),
                           ),
                         ],
                       ),
@@ -600,7 +600,7 @@ class ReelsPageDescription extends StatelessWidget {
   Widget build(BuildContext context) {
     return Column(
       children: [
-        SheetTouchButton(),
+        const SheetTouchButton(),
         SingleChildScrollView(
           child: Column(
             children: [
