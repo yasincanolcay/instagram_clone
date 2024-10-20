@@ -5,6 +5,7 @@ import 'package:instagram_clone/screens/pageviewer_screens/profilePage/profile_p
 import 'package:instagram_clone/screens/pageviewer_screens/reels_page.dart';
 import 'package:instagram_clone/screens/pageviewer_screens/search_page.dart';
 import 'package:instagram_clone/utils/colors.dart';
+import 'package:instagram_clone/utils/page_routes.dart';
 import 'package:instagram_clone/widgets/post_share_sheet.dart';
 
 class MobileLayout extends StatefulWidget {
@@ -16,36 +17,58 @@ class MobileLayout extends StatefulWidget {
 
 class _MobileLayoutState extends State<MobileLayout> {
   String uid = FirebaseAuth.instance.currentUser!.uid;
-  final PageController _pageController = PageController();
   int _page = 0;
-  void onChangedPage(int page) {
-    setState(() {
-      _page = page;
-    });
-  }
 
   void nextPage(int page) {
-    _pageController.jumpToPage(page);
+    _page = page;
+    currentUser.page = page;
+    currentUser.uid = uid;
+    setState(() {});
+  }
+
+  Map<int, GlobalKey<NavigatorState>> navigatorKeys = {
+    0: GlobalKey<NavigatorState>(),
+    1: GlobalKey<NavigatorState>(),
+    2: GlobalKey<NavigatorState>(),
+    3: GlobalKey<NavigatorState>(),
+  };
+
+  List<Widget> _widgetOptions = <Widget>[];
+
+  buildNavigator() {
+    return Navigator(
+      key: navigatorKeys[currentUser.page],
+      onGenerateRoute: (RouteSettings settings) {
+        _widgetOptions[3] = ProfilePage(
+          uid: currentUser.uid,
+        );
+        return MaterialPageRoute(
+          builder: (_) => _widgetOptions.elementAt(
+            currentUser.page,
+          ),
+        );
+      },
+    );
+  }
+
+  @override
+  void initState() {
+    _widgetOptions = [
+      const Feed(),
+      const SearchPage(),
+      const ReelsPage(),
+      ProfilePage(
+        uid: currentUser.uid,
+      ),
+    ];
+    super.initState();
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: Colors.white70,
-      body: PageView(
-        controller: _pageController,
-        onPageChanged: onChangedPage,
-        physics: const NeverScrollableScrollPhysics(),
-        children:  [
-          //buraya sayfalar gelecek
-          const Feed(),
-          const SearchPage(),
-          const ReelsPage(),
-          ProfilePage(
-            uid: uid,
-          ),
-        ],
-      ),
+      body: buildNavigator(),
       bottomNavigationBar: Container(
         decoration: BoxDecoration(
           color: Colors.white,
@@ -62,7 +85,9 @@ class _MobileLayoutState extends State<MobileLayout> {
           children: [
             IconButton(
               onPressed: () {
-                nextPage(0);
+                nextPage(
+                  0,
+                );
               },
               icon: Icon(
                 Icons.home_rounded,
@@ -71,7 +96,9 @@ class _MobileLayoutState extends State<MobileLayout> {
             ),
             IconButton(
               onPressed: () {
-                nextPage(1);
+                nextPage(
+                  1,
+                );
               },
               icon: Icon(
                 Icons.search_rounded,
@@ -95,7 +122,9 @@ class _MobileLayoutState extends State<MobileLayout> {
             ),
             IconButton(
               onPressed: () {
-                nextPage(2);
+                nextPage(
+                  2,
+                );
               },
               icon: Icon(
                 _page != 2
@@ -106,7 +135,9 @@ class _MobileLayoutState extends State<MobileLayout> {
             ),
             IconButton(
               onPressed: () {
-                nextPage(3);
+                nextPage(
+                  3,
+                );
               },
               icon: Icon(
                 _page != 3

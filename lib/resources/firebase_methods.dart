@@ -455,7 +455,7 @@ class FirebaseMethods {
         await fire
             .collection("users")
             .doc(userUid)
-            .collection("followers")
+            .collection("following")
             .doc(uid)
             .set({
           "uid": uid,
@@ -470,7 +470,7 @@ class FirebaseMethods {
         await fire
             .collection("users")
             .doc(userUid)
-            .collection("followers")
+            .collection("following")
             .doc(uid)
             .delete();
       }

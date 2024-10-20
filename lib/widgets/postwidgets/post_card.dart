@@ -16,6 +16,7 @@ import 'package:instagram_clone/screens/pageviewer_screens/profilePage/profile_p
 import 'package:instagram_clone/screens/push/searcher_page.dart';
 import 'package:instagram_clone/utils/colors.dart';
 import 'package:instagram_clone/utils/global_class.dart';
+import 'package:instagram_clone/utils/page_routes.dart';
 import 'package:instagram_clone/utils/utils.dart';
 import 'package:instagram_clone/widgets/postwidgets/post_more_sheet.dart';
 import 'package:instagram_clone/widgets/postwidgets/save_post_sheet.dart';
@@ -263,7 +264,7 @@ class _PostCardState extends State<PostCard> with TickerProviderStateMixin {
             }
           }
         } else if (widget.snap["type"] == "reels") {
-          if (visiblePercentage > 70) {
+          if (visiblePercentage > 65) {
             if (_videoPlayerController!.value.isInitialized) {
               _videoPlayerController!.play();
             }
@@ -284,12 +285,11 @@ class _PostCardState extends State<PostCard> with TickerProviderStateMixin {
             widget.snap["type"] == "photo"
                 ? ListTile(
                     onTap: () {
-                      Navigator.of(context).push(
-                        MaterialPageRoute(
-                          builder: (context) => ProfilePage(
-                            uid: widget.snap["author"],
-                          ),
-                        ),
+                      currentUser.uid = widget.snap["author"];
+                      currentUser.page = 3;
+                      Navigator.pushNamed(
+                        context,
+                        PageRouteNames.profile,
                       );
                     },
                     dense: true,
@@ -406,12 +406,11 @@ class _PostCardState extends State<PostCard> with TickerProviderStateMixin {
                           right: 8.0,
                           child: ListTile(
                             onTap: () {
-                              Navigator.of(context).push(
-                                MaterialPageRoute(
-                                  builder: (context) => ProfilePage(
-                                    uid: widget.snap["author"],
-                                  ),
-                                ),
+                              currentUser.uid = widget.snap["author"];
+                              currentUser.page = 3;
+                              Navigator.pushNamed(
+                                context,
+                                PageRouteNames.profile,
                               );
                             },
                             dense: true,

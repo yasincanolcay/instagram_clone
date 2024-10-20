@@ -14,6 +14,7 @@ import 'package:instagram_clone/screens/comment/comment_screen.dart';
 import 'package:instagram_clone/screens/push/searcher_page.dart';
 import 'package:instagram_clone/utils/colors.dart';
 import 'package:instagram_clone/utils/global_class.dart';
+import 'package:instagram_clone/utils/page_routes.dart';
 import 'package:instagram_clone/utils/utils.dart';
 import 'package:instagram_clone/widgets/post_share_sheet.dart';
 import 'package:instagram_clone/widgets/postwidgets/post_more_sheet.dart';
@@ -492,6 +493,14 @@ class _ReelsVideoCardState extends State<ReelsVideoCard> {
               child: Column(
                 children: [
                   ListTile(
+                    onTap: () {
+                      currentUser.uid = widget.snap["author"];
+                      currentUser.page = 3;
+                      Navigator.pushNamed(
+                        context,
+                        PageRouteNames.profile,
+                      );
+                    },
                     dense: true,
                     leading: profilePhoto != ""
                         ? CircleAvatar(

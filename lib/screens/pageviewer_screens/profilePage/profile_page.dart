@@ -1,3 +1,5 @@
+// ignore_for_file: use_build_context_synchronously, must_be_immutable
+
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
@@ -6,14 +8,19 @@ import 'package:flutter_staggered_grid_view/flutter_staggered_grid_view.dart';
 import 'package:instagram_clone/resources/auth_methods.dart';
 import 'package:instagram_clone/resources/firebase_methods.dart';
 import 'package:instagram_clone/screens/auth/login_screen.dart';
+import 'package:instagram_clone/screens/pageviewer_screens/profilePage/components/followers_builder.dart';
+import 'package:instagram_clone/screens/pageviewer_screens/profilePage/components/following_builder.dart';
+import 'package:instagram_clone/screens/pageviewer_screens/profilePage/components/sign_out_alert.dart';
 import 'package:instagram_clone/screens/pageviewer_screens/profilePage/edit_post_screen.dart';
 import 'package:instagram_clone/utils/colors.dart';
 import 'package:instagram_clone/utils/global_class.dart';
+import 'package:instagram_clone/utils/page_routes.dart';
+import 'package:instagram_clone/widgets/post_share_sheet.dart';
 import 'package:instagram_clone/widgets/postwidgets/post_grid_card.dart';
 
 class ProfilePage extends StatefulWidget {
-  const ProfilePage({super.key, required this.uid});
-  final String uid;
+  ProfilePage({super.key, required this.uid});
+  String uid;
 
   @override
   State<ProfilePage> createState() => _ProfilePageState();
@@ -106,6 +113,10 @@ class _ProfilePageState extends State<ProfilePage> {
 
   @override
   void initState() {
+    if (widget.uid.isEmpty) {
+      widget.uid = currentUser.uid;
+      setState(() {});
+    }
     getUserData();
     super.initState();
   }
@@ -129,7 +140,15 @@ class _ProfilePageState extends State<ProfilePage> {
                   mainAxisSize: MainAxisSize.min,
                   children: [
                     IconButton(
-                      onPressed: () {},
+                      onPressed: () {
+                        showModalBottomSheet(
+                          context: context,
+                          backgroundColor: Colors.white,
+                          builder: (context) {
+                            return PostShareSheet();
+                          },
+                        );
+                      },
                       icon: const Icon(
                         Icons.add,
                       ),
@@ -181,8 +200,32 @@ class _ProfilePageState extends State<ProfilePage> {
                                 ],
                               ),
                               buildStatColumn(postLength, "Gönderi"),
-                              buildStatColumn(followers.length, "Takipçi"),
-                              buildStatColumn(followings.length, "Takip"),
+                              GestureDetector(
+                                onTap: () {
+                                  Navigator.of(context).push(
+                                    MaterialPageRoute(
+                                      builder: (context) => FollowersBuilder(
+                                        uid: widget.uid,
+                                      ),
+                                    ),
+                                  );
+                                },
+                                child: buildStatColumn(
+                                    followers.length, "Takipçi"),
+                              ),
+                              GestureDetector(
+                                onTap: (){
+                                   Navigator.of(context).push(
+                                    MaterialPageRoute(
+                                      builder: (context) => FollowingBuilder(
+                                        uid: widget.uid,
+                                      ),
+                                    ),
+                                  );
+                                },
+                                child:
+                                    buildStatColumn(followings.length, "Takip"),
+                              ),
                             ],
                           ),
                           BioContainer(bio: bio),
@@ -236,14 +279,11 @@ class _ProfilePageState extends State<ProfilePage> {
                                   child: ElevatedButton(
                                     onPressed: () async {
                                       if (widget.uid == myUid) {
-                                        await AuthMethods().signOutUser();
-                                        Navigator.of(context)
-                                            .pushAndRemoveUntil(
-                                                MaterialPageRoute(
-                                                  builder: (context) =>
-                                                      const LoginScreen(),
-                                                ),
-                                                (route) => false);
+                                        showDialog(
+                                          context: context,
+                                          builder: (context) =>
+                                              const SignOutAlert(),
+                                        );
                                       } else {
                                         //chat sayfasını ac
                                       }

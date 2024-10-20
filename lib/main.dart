@@ -6,6 +6,7 @@ import 'package:flutter/material.dart';
 import 'package:instagram_clone/layouts/mobile_layout.dart';
 import 'package:instagram_clone/screens/auth/login_screen.dart';
 import 'package:instagram_clone/utils/colors.dart';
+import 'package:instagram_clone/utils/page_routes.dart';
 import 'package:permission_handler/permission_handler.dart';
 
 void main() async {
